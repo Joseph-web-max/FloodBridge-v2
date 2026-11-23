@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1724">
+<title>Community Flood Report | FloodBridge</title>
+<style>
+:root{color-scheme:dark;--bg:#091522;--panel:#142a40;--line:#29445d;--text:#eff7fc;--muted:#9bb0c4;--teal:#48dbc0;--amber:#f4bc61;--red:#ff7777;font-family:Inter,system-ui,Segoe UI,Arial}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 70% -20%,#17405a 0,transparent 36%),var(--bg);color:var(--text);min-height:100vh}.wrap{width:min(760px,100%);margin:0 auto;padding:26px 16px 50px}.card{background:linear-gradient(145deg,#142a40,#102033);border:1px solid var(--line);border-radius:18px;padding:22px;margin:14px 0}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#50e1c4,#79b8ff);color:#09202b;font-weight:900;font-size:24px}.muted{color:var(--muted);font-size:13px;line-height:1.6}h1{font-size:30px;margin:20px 0 8px}h2{font-size:17px}label{display:block;font-size:12px;color:#b0c5d7;font-weight:700;margin-bottom:6px}.field{margin:13px 0}input,select,textarea{width:100%;border:1px solid #36516a;border-radius:10px;background:#0b1a29;color:var(--text);padding:12px;font:inherit}textarea{min-height:110px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btn{border:1px solid var(--teal);background:var(--teal);color:#08231f;padding:12px 16px;border-radius:11px;font-weight:800;cursor:pointer}.btn:disabled{opacity:.6;cursor:wait}.notice{padding:13px 14px;border-radius:12px;background:#332c1d;border:1px solid #6a542b;color:#f2d59a;font-size:12px;line-height:1.6}.success{background:#112e2b;border-color:#286353;color:#a9efdb}.error{background:#48262d;border-color:#803c45;color:#ffc1c1}.result{display:none;white-space:pre-wrap}.small{font-size:11px;color:#809ab2}.check{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--muted)}.check input{width:auto;margin-top:2px}@media(max-width:540px){.grid{grid-template-columns:1fr}.card{padding:16px}h1{font-size:25px}}
+</style>
+</head>
+<body><main class="wrap">
+ <div class="brand"><div class="logo">F</div><div><b>FloodBridge</b><div class="small">COMMUNITY REPORTING PORTAL</div></div></div>
+ <h1>Report a flood-related incident</h1>
+ <p class="muted">Use this form to report flooding, blocked crossings, infrastructure damage or people who may need assistance. You do not need a FloodBridge account. Please report only what you know and never enter floodwater to collect information.</p>
+ <div id="orgStatus" class="notice">Checking reporting destination…</div>
+ <form id="reportForm" class="card">
+  <h2>Incident details</h2>
+  <div class="grid">
+   <div class="field"><label for="category">What are you reporting? *</label><select id="category" required><option value="flooding">Flooding / rising water</option><option value="blocked_crossing">Blocked road or crossing</option><option value="stranded_people">People stranded / urgent assistance</option><option value="infrastructure_damage">Bridge, road or drainage damage</option><option value="other">Other flood-related incident</option></select></div>
+   <div class="field"><label for="severity">How serious does it appear? *</label><select id="severity" required><option value="unknown">Not sure</option><option value="low">Low</option><option value="moderate">Moderate</option><option value="high">High</option><option value="critical">Critical / life-threatening</option></select></div>
+  </div>
+  <div class="field"><label for="location">Location / nearest landmark *</label><input id="location" required maxlength="500" placeholder="Village, road, bridge, ward, landmark"></div>
+  <div class="grid"><div class="field"><label for="latitude">Latitude (optional)</label><input id="latitude" type="number" min="-90" max="90" step="any" placeholder="-1.2864"></div><div class="field"><label for="longitude">Longitude (optional)</label><input id="longitude" type="number" min="-180" max="180" step="any" placeholder="36.8172"></div></div>
+  <div class="field"><label for="description">What happened? *</label><textarea id="description" required minlength="10" maxlength="5000" placeholder="Describe what you observed, when it happened and who or what may be affected."></textarea></div>
+  <div class="grid"><div class="field"><label for="reporter">Your name (optional)</label><input id="reporter" maxlength="120" placeholder="You may leave this blank"></div><div class="field"><label for="contact">Phone / email (optional)</label><input id="contact" maxlength="180" placeholder="Only if you want follow-up"></div></div>
+  <label class="check"><input id="consent" type="checkbox"> I understand that this report will be shared with the organisation operating FloodBridge for incident assessment and response coordination. I have not included unnecessary sensitive personal information.</label>
+  <div class="field"><button class="btn" id="submitBtn" type="submit">Submit incident report</button></div>
+  <div id="result" class="notice result" role="status" aria-live="polite"></div>
+  <p class="small">Do not use this form instead of contacting local emergency services when someone is in immediate danger. Reports are unverified until checked by an authorised officer. Submitting a report does not guarantee rescue or assistance.</p>
+ </form>
+ <section class="card" aria-labelledby="statusHeading">
+  <h2 id="statusHeading">Check an existing report</h2>
+  <p class="muted">Enter the reference number you received after submitting your report. Only the report status and verification state are shown.</p>
+  <div class="field"><label for="statusReference">Report reference</label><input id="statusReference" maxlength="40" placeholder="FB-20261123-AB12CD34EF567890AB12"></div>
+  <button class="btn" type="button" id="checkStatusBtn">Check report status</button>
+  <div id="statusResult" class="notice result" role="status" aria-live="polite"></div>
+ </section>
+ <div class="small">FloodBridge · Community evidence for better response decisions</div>
+</main>
+<script src="config.js"></script>
+<script>
+const qs=new URLSearchParams(location.search);const cfg=window.FLOODBRIDGE_CONFIG||{};const orgId=qs.get('org_id')||cfg.publicOrgId||'';
+const status=document.getElementById('orgStatus');const form=document.getElementById('reportForm');const result=document.getElementById('result');const btn=document.getElementById('submitBtn');const statusBtn=document.getElementById('checkStatusBtn');const statusResult=document.getElementById('statusResult');
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+if(!uuid.test(orgId)){status.className='notice error';status.textContent='This reporting link is missing a valid organisation destination. Please request the correct community reporting link from the organisation.';btn.disabled=true;statusBtn.disabled=true;}
+else if(!cfg.supabaseUrl||!cfg.supabaseAnonKey){status.className='notice error';status.textContent='This reporting portal is not connected to its cloud service yet. Please contact the organisation.';btn.disabled=true;statusBtn.disabled=true;}
+else{status.className='notice';status.textContent='Reporting destination is selected. Your report will be received by the organisation after the service is online.';}
+statusBtn.addEventListener('click',async()=>{
+ const reference=document.getElementById('statusReference').value.trim().toUpperCase();if(!uuid.test(orgId)||!cfg.supabaseUrl||!cfg.supabaseAnonKey)return;if(!reference){statusResult.style.display='block';statusResult.className='notice error result';statusResult.textContent='Enter the report reference first.';return;}statusBtn.disabled=true;statusBtn.textContent='Checking…';statusResult.style.display='none';
+ try{const response=await fetch(cfg.supabaseUrl.replace(/\/$/,'')+'/functions/v1/community-status',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey,'Authorization':'Bearer '+cfg.supabaseAnonKey},body:JSON.stringify({org_id:orgId,reference})});const data=await response.json();if(!response.ok)throw new Error(data.error||'Status could not be checked.');const r=data.report;statusResult.className='notice success result';statusResult.textContent='Report: '+r.reference+'\nStatus: '+r.status.replaceAll('_',' ')+'\nVerification: '+r.verification_status.replaceAll('_',' ')+'\nLast updated: '+new Date(r.last_updated_at).toLocaleString();statusResult.style.display='block';}
+ catch(err){statusResult.className='notice error result';statusResult.textContent=err.message||'A network error occurred.';statusResult.style.display='block';}
+ finally{statusBtn.disabled=false;statusBtn.textContent='Check report status';}
+});
+form.addEventListener('submit',async e=>{e.preventDefault();if(!uuid.test(orgId)||!cfg.supabaseUrl||!cfg.supabaseAnonKey)return;
+ const lat=document.getElementById('latitude').value,lon=document.getElementById('longitude').value;if((lat&&!lon)||(!lat&&lon)){result.style.display='block';result.className='notice error result';result.textContent='Enter both latitude and longitude, or leave both blank.';return;}
+ if(!document.getElementById('consent').checked){result.style.display='block';result.className='notice error result';result.textContent='Please confirm the information-sharing notice before submitting.';return;}
+ btn.disabled=true;btn.textContent='Submitting…';result.style.display='none';
+ try{const response=await fetch(cfg.supabaseUrl.replace(/\/$/,'')+'/functions/v1/community-intake',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey,'Authorization':'Bearer '+cfg.supabaseAnonKey},body:JSON.stringify({org_id:orgId,category:document.getElementById('category').value,severity:document.getElementById('severity').value,location:document.getElementById('location').value,latitude:lat||null,longitude:lon||null,description:document.getElementById('description').value,reporter_name:document.getElementById('reporter').value,reporter_contact:document.getElementById('contact').value,consent:true})});const data=await response.json();if(!response.ok)throw new Error(data.error||'The report could not be submitted.');result.className='notice success result';result.textContent='Thank you. Your report was received.\nReference: '+data.reference+'\n'+(data.message||'An authorised officer will review it.');result.style.display='block';form.reset();}
+ catch(err){result.className='notice error result';result.textContent=err.message||'A network error occurred. Please try again.';result.style.display='block';}
+ finally{btn.disabled=false;btn.textContent='Submit incident report';}
+});
+</script>
+</body></html>

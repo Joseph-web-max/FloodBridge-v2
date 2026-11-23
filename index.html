@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1724">
+<title>FloodBridge V2 | Institutional Flood Impact & Response Intelligence</title>
+<link rel="preconnect" href="https://unpkg.com"><link rel="preconnect" href="https://tile.openstreetmap.org">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+:root{--bg:#091522;--panel:#102236;--panel2:#162d44;--line:#29445d;--text:#eff7fc;--muted:#9bb0c4;--teal:#48dbc0;--blue:#80bfff;--amber:#f4bc61;--red:#ff7777;--green:#7ce0ac;--radius:18px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 70% -20%,#17405a 0,transparent 36%),var(--bg);color:var(--text);min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}aside{background:#0b1826;border-right:1px solid var(--line);padding:22px 15px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;gap:11px;align-items:center;padding:5px 8px 24px}.logo{width:43px;height:43px;border-radius:14px;background:linear-gradient(145deg,#50e1c4,#79b8ff);display:grid;place-items:center;color:#09202b;font-size:22px;font-weight:950;box-shadow:0 10px 28px #48dbc033}.brand strong{display:block;letter-spacing:.3px}.brand small{font-size:10px;color:var(--muted);letter-spacing:1px}
+.navlabel{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#6f879e;padding:9px 12px}
+nav button{width:100%;border:0;background:transparent;color:#a9bdcf;text-align:left;padding:11px 12px;border-radius:11px;display:flex;align-items:center;gap:11px;margin:2px 0;font-size:12px}nav button:hover,nav button.active{background:#1b3449;color:white}nav button.active{box-shadow:inset 3px 0 var(--teal)}.ni{width:19px;text-align:center;color:var(--teal);font-size:15px}
+.asidefoot{position:absolute;bottom:16px;left:19px;right:19px;color:#70879d;font-size:10px;line-height:1.65}
+main{width:100%;max-width:1600px;margin:auto;padding:27px clamp(14px,3vw,42px) 45px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}.eyebrow{color:var(--teal);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:800}h1{font-size:clamp(25px,3vw,36px);letter-spacing:-1px;margin:7px 0 4px}.sub{color:var(--muted);font-size:12px;line-height:1.65}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#193149;color:var(--text);padding:10px 13px;border-radius:11px;font-size:11px;font-weight:700}.btn:hover{border-color:var(--teal);transform:translateY(-1px)}.btn.primary{background:var(--teal);color:#08231f;border-color:var(--teal)}.btn.ghost{background:transparent}
+.grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:18px 0}.card{background:linear-gradient(145deg,#142a40,#102033);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 12px 34px #0002}.statlabel{font-size:11px;color:var(--muted)}.statvalue{font-size:30px;font-weight:850;letter-spacing:-1px;margin:8px 0 2px}.statnote{font-size:10px;color:#849db4}.teal{color:var(--teal)}.amber{color:var(--amber)}.red{color:var(--red)}.green{color:var(--green)}
+.two{grid-template-columns:1.3fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 13px}.sectionhead h2{font-size:15px;margin:0}.pill{border:1px solid #34516b;background:#1a344b;color:#bdd5e8;border-radius:30px;padding:5px 9px;font-size:9px;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:11px}th{text-align:left;color:#8199b0;font-weight:650;padding:10px 7px;border-bottom:1px solid var(--line)}td{padding:11px 7px;border-bottom:1px solid #233b52;color:#d9e7f1;vertical-align:top}tr:last-child td{border:0}.empty{text-align:center;padding:28px;color:#8fa5b9;font-size:12px}
+.field{display:flex;flex-direction:column;gap:6px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field.full{grid-column:1/-1}.field label{font-size:10px;color:#b0c5d7;font-weight:700}.field input,.field select,.field textarea{width:100%;border:1px solid #36516a;border-radius:10px;background:#0b1a29;color:var(--text);padding:11px 12px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px #48dbc01a}.field textarea{min-height:82px;resize:vertical}.hint{font-size:10px;color:#7e96ad;line-height:1.5}
+.notice{padding:12px 14px;border-radius:12px;background:#332c1d;border:1px solid #6a542b;color:#f2d59a;font-size:11px;line-height:1.6;margin:13px 0}.notice.blue{background:#142a40;border-color:#315776;color:#b9d9f0}.notice.green{background:#112e2b;border-color:#286353;color:#a9efdb}.hidden{display:none!important}
+.tag{display:inline-block;border-radius:22px;padding:5px 8px;font-size:9px;font-weight:800;background:#183d39;color:#8fe9d0}.tag.warn{background:#45371f;color:#ffd18a}.tag.bad{background:#48262d;color:#ffaaaa}.tag.info{background:#203b55;color:#b9d7f3}.tag.gray{background:#293848;color:#b7c6d3}
+#map{height:405px;border-radius:14px;border:1px solid #2b465f;overflow:hidden;background:#142b3f}.maptools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.maptools button{font-size:10px;padding:8px 10px}.leaflet-container{font:12px system-ui}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#102236;color:#eef7fc}.leaflet-popup-content{line-height:1.6}.leaflet-control-attribution{font-size:9px}
+.kpirow{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #263e55;font-size:11px}.kpirow:last-child{border:0}.chart{height:160px;display:flex;align-items:end;gap:7px;padding:12px 5px 4px;border-bottom:1px solid var(--line)}.barcol{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:6px}.bar{width:min(28px,80%);background:linear-gradient(180deg,#76e8ce,#268e91);border-radius:6px 6px 2px 2px}.barcol small{font-size:9px;color:#8ba2b8}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0}.tabs button{border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 10px;border-radius:9px;font-size:10px}.tabs button.active{background:#1d3b4b;color:var(--teal);border-color:#397269}
+.forecastrow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:14px}.forecastcell{background:#102a40;border:1px solid #2b4961;border-radius:12px;padding:10px;text-align:center}.forecastcell b{font-size:15px;display:block;margin:5px 0}.forecastcell small{font-size:9px;color:var(--muted)}
+.toasts{position:fixed;right:14px;bottom:14px;display:grid;gap:8px;z-index:9999}.toast{background:#102236;border:1px solid var(--teal);color:var(--text);padding:11px 14px;border-radius:12px;font-size:12px;max-width:340px;box-shadow:0 12px 30px #0006}.toast.error{border-color:var(--red)}.toast.warning{border-color:var(--amber)}.modalbg{position:fixed;inset:0;background:#000a;display:none;place-items:center;z-index:9000;padding:14px}.modalbg.open{display:grid}.modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;width:min(430px,100%)}.btn.danger{border-color:#7a3a42;color:#ffb0b0}.btn.sm{padding:6px 8px;font-size:10px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.filters input,.filters select{border:1px solid #36516a;border-radius:10px;background:#0b1a29;color:var(--text);padding:9px 11px;font-size:11px}.statusdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6f879e;margin-right:6px}.statusdot.on{background:var(--green)}.statusdot.warn{background:var(--amber)}.rowbtns{display:flex;gap:5px;flex-wrap:wrap}
+footer{text-align:center;color:#6d859d;font-size:10px;margin:30px 0 0}
+@media(max-width:950px){.app{grid-template-columns:1fr}aside{height:auto;position:relative;padding:12px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:3px 5px 10px}nav{display:flex;overflow:auto;gap:4px}nav button{width:auto;white-space:nowrap;padding:9px 11px;font-size:10px}.navlabel,.asidefoot{display:none}main{padding:18px 13px 35px}.two{grid-template-columns:1fr}}
+@media(max-width:560px){.top{flex-direction:column;align-items:flex-start}.stats{grid-template-columns:repeat(2,1fr);gap:8px}.statvalue{font-size:25px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.three{grid-template-columns:1fr}.forecastrow{grid-template-columns:repeat(3,1fr)}.card{padding:14px}#map{height:330px}}
+@media print{aside,.actions,.maptools,footer{display:none!important}body{background:white;color:#111}.card{background:white;color:#111;box-shadow:none;border:1px solid #ccc}.sub,td,th{color:#333}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+ <div class="brand"><div class="logo">F</div><div><strong>FloodBridge</strong><small>FLOOD IMPACT INTELLIGENCE</small></div></div>
+ <div class="navlabel">Operations</div>
+ <nav id="nav">
+  <button class="active" data-page="overview"><span class="ni">◈</span>Command overview</button>
+  <button data-page="map"><span class="ni">⌖</span>Map & monitored sites</button>
+  <button data-page="report"><span class="ni">＋</span>Submit observation</button>
+  <button data-page="events"><span class="ni">▤</span>Event register</button>
+  <button data-page="assets"><span class="ni">▦</span>Lifeline assets</button>
+  <button data-page="incidents"><span class="ni">⚑</span>Incident inbox</button>
+  <button data-page="response"><span class="ni">✓</span>Response coordination</button>
+  <div class="navlabel">Evidence & tools</div>
+  <button data-page="forecast"><span class="ni">☁</span>Rainfall outlook</button>
+  <button data-page="devices"><span class="ni">⌁</span>Sensor connections</button>
+  <button data-page="reports"><span class="ni">▧</span>Reports & exports</button>
+  <button data-page="routes"><span class="ni">⇄</span>Route analysis</button>
+  <button data-page="integrations"><span class="ni">⇌</span>Integrations & channels</button>
+  <button data-page="notifications"><span class="ni">✉</span>Notification centre</button>
+  <button data-page="community"><span class="ni">◎</span>Community access</button>
+  <button data-page="settings"><span class="ni">⚙</span>Settings & team</button>
+  <button data-page="research"><span class="ni">◫</span>About & limitations</button>
+ </nav>
+ <div class="asidefoot">COMMUNITY + SENSOR EVIDENCE<br>Not an official warning service<br>Build 2.0 · <span id="sideSync">Local records</span></div>
+</aside>
+<main>
+ <header class="top">
+  <div><div class="eyebrow">Resilience • mobility • essential services</div><h1 id="pageTitle">Flood impact command overview</h1><div class="sub" id="pageSub">Connect flood observations to crossing status and essential-service access.</div></div>
+  <div class="actions"><span class="pill" id="syncPill">LOCAL ONLY</span><button class="btn primary" onclick="go('report')">＋ New observation</button></div>
+ </header>
+
+ <section id="page-overview">
+  <div id="alertBanner"></div>
+  <div class="grid stats">
+   <div class="card"><div class="statlabel">Monitored locations</div><div class="statvalue" id="kSites">0</div><div class="statnote">Sites registered in this workspace</div></div>
+   <div class="card"><div class="statlabel">Fresh observations</div><div class="statvalue teal" id="kFresh">0</div><div class="statnote">Within the configured freshness window</div></div>
+   <div class="card"><div class="statlabel">Reported blocked crossings</div><div class="statvalue red" id="kBlocked">0</div><div class="statnote">Not necessarily independently verified</div></div>
+   <div class="card"><div class="statlabel">Potentially affected assets</div><div class="statvalue amber" id="kAssets">0</div><div class="statnote">Based on manually linked crossing dependencies</div></div>
+  </div>
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Flood impact map</h2><span class="pill">OpenStreetMap</span></div><div id="mapOverview" style="height:300px;border-radius:13px;background:#142b3f"></div><div class="sub" style="margin-top:9px">Map pins show locations recorded in this browser. They are not an official flood map.</div></div>
+   <div class="card"><div class="sectionhead"><h2>Latest crossing intelligence</h2><span class="pill">Observation-led</span></div><div id="latestList"></div><div class="notice blue">A report is not an official warning. Always follow instructions from national and county disaster-management authorities.</div></div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+   <div class="card"><div class="sectionhead"><h2>Evidence status</h2><span class="pill">Freshness-aware</span></div><div id="evidenceBars" class="chart"></div><div class="sub">Fresh, aging and expired reports are separated so old observations do not look current.</div></div>
+   <div class="card"><div class="sectionhead"><h2>Forecast rainfall at sites</h2><span class="pill">Open-Meteo · next 24 h</span></div><div id="rainList"><div class="empty">Register sites to see forecast rainfall.</div></div><p class="sub">Forecast rainfall is context only. It is not a river-stage or flooding forecast.</p></div>
+  </div>
+  <div class="notice">Safety boundary: never enter floodwater or approach a flooded crossing to collect a reading. Observations should be made from a safe position. Do not interpret a route as safe solely because there is no recent report.</div>
+ </section>
+
+ <section id="page-map" class="hidden">
+  <div class="card"><div class="sectionhead"><h2>Geospatial situation view</h2><span class="pill">Community + device records</span></div>
+   <div id="mainMap" style="height:440px;border-radius:13px;background:#142b3f"></div>
+   <div class="maptools"><button class="btn" onclick="fitMap()">Fit all locations</button><button class="btn" onclick="locateMe()">Use my location</button><button class="btn primary" onclick="go('report')">＋ Report at a location</button></div>
+   <div class="sub">Basemap tiles require internet. Records can be captured offline, but an offline map is not bundled. Map accuracy depends on the coordinates users submit.</div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Satellite flood observations</h2><span class="pill">NASA Worldview · MODIS</span></div>
+   <p class="sub">Open NASA's global near-real-time flood observations with the 2-day and 3-day MODIS layers preselected. Use this as supplementary situational context alongside verified field reports, gauge readings and local authority information.</p>
+   <div class="actions"><a class="btn primary" href="https://worldview.earthdata.nasa.gov/?tr=flood-product" target="_blank" rel="noopener noreferrer">Open NASA flood layers ↗</a><a class="btn" href="https://www.earthdata.nasa.gov/data/instruments/modis/near-real-time-data/modis-nrt-flood-product" target="_blank" rel="noopener noreferrer">Product details ↗</a></div>
+   <p class="hint">Limitations: MODIS detects optically observed surface water and cannot see through persistent cloud cover. Satellite pixels and acquisition time may not capture narrow roads, underpasses or rapidly changing local conditions. This link does not automatically classify FloodBridge roads or incidents.</p>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+   <div class="card"><div class="sectionhead"><h2>Register monitored site</h2></div>
+    <form id="siteForm"><input type="hidden" id="siteEditId"><div class="formgrid">
+     <div class="field"><label>Site name *</label><input id="siteName" required placeholder="e.g. River crossing 02"></div>
+     <div class="field"><label>Site type</label><select id="siteType"><option>Road crossing</option><option>Footbridge</option><option>River gauge</option><option>Drainage hotspot</option><option>Low-water bridge</option><option>Other</option></select></div>
+     <div class="field"><label>Latitude *</label><input id="siteLat" type="number" step="any" required placeholder="-1.2864"></div>
+     <div class="field"><label>Longitude *</label><input id="siteLon" type="number" step="any" required placeholder="36.8172"></div>
+     <div class="field"><label>Local gauge datum (m)</label><input id="datum" type="number" step="0.001" placeholder="Optional, surveyed reference"></div>
+     <div class="field"><label>Watch level (m)</label><input id="watchLevel" type="number" step="0.001" placeholder="Set by competent authority"></div>
+     <div class="field"><label>Alert level (m)</label><input id="alertLevel" type="number" step="0.001" placeholder="Set by competent authority"></div>
+     <div class="field"><label>Action level (m)</label><input id="actionLevel" type="number" step="0.001" placeholder="Set by competent authority"></div>
+     <div class="field full"><label>Site notes / threshold source</label><textarea id="siteNotes" placeholder="Who surveyed the datum? Which authority supplied thresholds? Revision date?"></textarea></div>
+    </div><div class="actions" style="margin-top:12px"><button class="btn primary" id="siteSaveBtn">Save monitored site</button><button type="button" class="btn hidden" id="siteCancelBtn">Cancel edit</button></div><p class="hint">Thresholds are optional and must come from local hydrological / engineering authorities. No generic flood thresholds are preloaded.</p></form>
+   </div>
+   <div class="card"><div class="sectionhead"><h2>Registered sites</h2><span class="pill" id="siteCount">0 sites</span></div><div id="siteTable"></div></div>
+  </div>
+ </section>
+
+ <section id="page-report" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Submit a flood observation</h2><span class="pill">Offline-capable form</span></div>
+    <form id="observationForm"><div class="formgrid">
+     <div class="field"><label>Observation type *</label><select id="obsType"><option value="crossing">Crossing / road passability</option><option value="water_level">Water-level gauge reading</option><option value="flood_extent">Flood extent / inundation</option><option value="drainage">Blocked drain / drainage overflow</option><option value="damage">Infrastructure damage</option></select></div>
+     <div class="field"><label>Linked monitored site</label><select id="obsSite"><option value="">Unlinked / choose coordinates</option></select></div>
+     <div class="field"><label>Passability status</label><select id="passability"><option value="unknown">Unknown / not assessed</option><option value="clear">Reported clear at observation time</option><option value="caution">Difficult / caution</option><option value="blocked">Reported blocked</option></select></div>
+     <div class="field"><label>Water depth above road (cm)</label><input id="depth" type="number" min="0" step="0.1" placeholder="Only if safely measured"></div>
+     <div class="field"><label>Water level / stage (m)</label><input id="stage" type="number" step="0.001" placeholder="Gauge datum referenced"></div>
+     <div class="field"><label>Observation source *</label><select id="obsSource"><option value="community">Community observer</option><option value="field_team">Trained field team</option><option value="device">Connected sensor device</option><option value="official">Official bulletin (manual entry)</option></select></div>
+     <div class="field"><label>Latitude *</label><input id="obsLat" type="number" step="any" required placeholder="-1.2864"></div>
+     <div class="field"><label>Longitude *</label><input id="obsLon" type="number" step="any" required placeholder="36.8172"></div>
+     <div class="field"><label>Observer code (optional)</label><input id="observer" placeholder="Pseudonymous team / badge code"></div>
+     <div class="field"><label>Observed at *</label><input id="observedAt" type="datetime-local" required></div>
+     <div class="field full"><label>What did you observe? *</label><textarea id="obsNotes" required placeholder="Describe visible conditions, direction of flow, landmarks, any uncertainty. Do not enter floodwater."></textarea></div>
+    </div><div class="actions" style="margin-top:13px"><button class="btn primary">Save observation</button><button type="button" class="btn" onclick="useCurrentLocation()">Use my current coordinates</button></div>
+    <p class="hint">A report is initially marked unverified. A user-selected “official bulletin” source is only a manually attributed entry; the platform does not independently authenticate it.</p>
+    </form>
+   </div>
+   <div class="card"><h2 style="font-size:15px;margin-top:2px">Evidence confidence, not a false certainty score</h2>
+    <div class="kpirow"><span>Unverified</span><span class="tag warn">Single source</span></div>
+    <div class="kpirow"><span>Corroborated</span><span class="tag">Multiple submissions</span></div>
+    <div class="kpirow"><span>Conflicting</span><span class="tag bad">Different reports</span></div>
+    <div class="kpirow"><span>Expired</span><span class="tag gray">Too old for live status</span></div>
+    <div class="notice blue">Corroboration means multiple submissions match the same site and condition within a time window. This does not prove submitters are independent or that a measurement is accurate.</div>
+    <div class="notice">Report only from a safe position. Never walk, drive or wade through floodwater to verify a crossing.</div>
+   </div>
+  </div>
+ </section>
+
+ <section id="page-events" class="hidden"><div class="card"><div class="sectionhead"><h2>Observation & event register</h2><div class="actions"><button class="btn" onclick="exportCSV()">Export CSV</button><button class="btn" onclick="exportJSON()">Backup JSON</button></div></div><div class="filters"><input id="evSearch" placeholder="Search site, notes, observer"><select id="evVer"><option value="">All verification</option><option value="unverified">Unverified</option><option value="verified">Verified</option><option value="rejected">Rejected</option></select><select id="evFresh"><option value="">All freshness</option><option value="fresh">Fresh</option><option value="aging">Aging</option><option value="expired">Expired</option></select></div><div id="eventTable"></div></div></section>
+
+ <section id="page-assets" class="hidden"><div class="grid two">
+  <div class="card"><div class="sectionhead"><h2>Register an essential-service asset</h2></div>
+   <form id="assetForm"><input type="hidden" id="assetEditId"><div class="formgrid">
+    <div class="field"><label>Asset name *</label><input id="assetName" required placeholder="Health centre / school / shelter"></div>
+    <div class="field"><label>Asset category</label><select id="assetType"><option>Health facility</option><option>Emergency shelter</option><option>School</option><option>Water point</option><option>Market</option><option>Fire / rescue station</option><option>Food distribution</option><option>Other</option></select></div>
+    <div class="field"><label>Latitude *</label><input id="assetLat" type="number" step="any" required></div>
+    <div class="field"><label>Longitude *</label><input id="assetLon" type="number" step="any" required></div>
+    <div class="field"><label>Criticality</label><select id="assetCriticality"><option>High</option><option>Medium</option><option>Low</option></select></div>
+    <div class="field"><label>Access depends on which monitored site?</label><select id="assetDependency"><option value="">No dependency mapped</option></select></div>
+    <div class="field full"><label>Operating / access notes</label><textarea id="assetNotes" placeholder="Opening hours, alternative access notes, contact procedure (avoid sensitive personal details)"></textarea></div>
+   </div><div class="actions" style="margin-top:12px"><button class="btn primary" id="assetSaveBtn">Save lifeline asset</button><button type="button" class="btn hidden" id="assetCancelBtn">Cancel edit</button></div></form>
+  </div>
+  <div class="card"><div class="sectionhead"><h2>Potential access impacts</h2><span class="pill">Manual dependencies</span></div><div id="assetImpact"></div><div class="notice blue">This page identifies assets linked by your team to a reported crossing. It does not calculate road-network reachability or guarantee that an alternative route is safe.</div></div>
+ </div><div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Registered lifeline assets</h2></div><div id="assetTable"></div></div></section>
+
+ <section id="page-forecast" class="hidden">
+  <div class="grid two"><div class="card"><div class="sectionhead"><h2>Rainfall forecast connection</h2><span class="pill">Open-Meteo API</span></div>
+   <div class="field"><label>Forecast location</label><select id="forecastSite"></select></div>
+   <div class="formgrid" style="margin-top:12px"><div class="field"><label>Latitude</label><input id="forecastLat" type="number" step="any" placeholder="-1.2864"></div><div class="field"><label>Longitude</label><input id="forecastLon" type="number" step="any" placeholder="36.8172"></div></div>
+   <div class="actions" style="margin-top:12px"><button class="btn primary" onclick="loadForecast()">Fetch rainfall outlook</button><button class="btn" onclick="copyForecastCoords()">Use selected site</button></div>
+   <div id="forecastStatus" class="sub" style="margin-top:12px">Choose a site or enter coordinates, then fetch the forecast.</div>
+  </div><div class="card"><h2 style="font-size:15px;margin-top:2px">Forecast interpretation</h2><div id="forecastSummary" class="empty">No forecast loaded.</div><div class="notice">Forecast rainfall is not a river-level forecast and does not establish that a road or crossing is flooded. Rainfall response depends on catchment, drainage, soil, upstream conditions and other factors.</div></div></div>
+  <div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Hourly precipitation</h2><span class="pill">Next available forecast hours</span></div><div id="forecastHours" class="forecastrow"></div></div>
+ </section>
+
+ <section id="page-devices" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Water-level sensor connection</h2><span class="pill">USB Serial / BLE NUS</span></div>
+    <p class="sub">Connect a compatible ESP32 water-level node that emits JSON-line water-level telemetry. The browser only imports reported values; it does not calibrate or validate the sensor.</p>
+    <div class="actions"><button class="btn primary" onclick="connectBLE()">Connect Bluetooth LE</button><button class="btn" onclick="connectSerial()">Connect USB Serial</button><button class="btn" onclick="disconnectDevices()">Disconnect</button></div>
+    <div id="deviceStatus" class="notice blue">No device connected. BLE requires a supported browser and HTTPS. USB Serial support varies by browser.</div>
+    <div class="field"><label>Assign incoming device to site</label><select id="deviceSite"></select></div>
+    <div id="lastTelemetry" class="sub" style="margin-top:13px">No telemetry received.</div>
+   </div>
+   <div class="card"><h2 style="font-size:15px;margin-top:2px">Device data checklist</h2><ul class="sub" style="line-height:2"><li>Unique site and device identifiers</li><li>Sensor-to-gauge-datum installation height</li><li>Stable mount and surveyed reference datum</li><li>Known measurement range and blind zone</li><li>Time synchronisation and signal-loss detection</li><li>Independent manual staff-gauge comparison</li><li>Weatherproof enclosure and safe power</li></ul><div class="notice">Do not install or adjust equipment from a bridge edge, inside a channel or during a flood. Installation requires a safe work plan and qualified local team.</div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Device registry</h2><span class="pill">Last seen per device</span></div><div id="deviceRegistry"></div></div><div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Latest device readings</h2></div><div id="telemetryTable"></div></div>
+ </section>
+
+ <section id="page-reports" class="hidden">
+  <div class="grid two"><div class="card"><h2 style="font-size:15px">Data exports</h2><p class="sub">Export locally stored sites, observations, assets and device readings for authorised research and operations.</p><div class="actions"><button class="btn primary" onclick="exportJSON()">Download local JSON backup</button><button class="btn" id="v2ExportOrgBundle">Export full organisation backup</button><button class="btn" onclick="exportCSV()">Observations CSV</button><button class="btn" onclick="exportKind('sites')">Sites CSV</button><button class="btn" onclick="exportKind('assets')">Assets CSV</button><button class="btn" onclick="exportKind('telemetry')">Telemetry CSV</button><button class="btn" onclick="window.print()">Print / Save PDF</button></div><div class="notice">Records are kept in this browser and, when signed in to an organisation, synced to your cloud workspace. Export backups regularly and protect files containing operational information.</div></div>
+  <div class="card"><h2 style="font-size:15px">Operational summary</h2><div id="summaryReport"></div></div></div>
+  <div class="card" style="margin-top:14px"><h2 style="font-size:15px">Latest observation detail</h2><div id="reportDetail" class="sub">Select an event from the event register.</div></div>
+  <div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Institution audit log</h2><button class="btn" id="v2RefreshAudit">Refresh audit log</button></div><div id="v2AuditLog"><div class="empty">Sign in as an organisation administrator to view audit records.</div></div></div>
+ </section>
+
+
+ <section id="page-incidents" class="hidden">
+  <div class="grid stats">
+   <div class="card"><div class="statlabel">Open incidents</div><div class="statvalue amber" id="v2OpenIncidents">—</div><div class="statnote">New, acknowledged or in progress</div></div>
+   <div class="card"><div class="statlabel">Unverified reports</div><div class="statvalue red" id="v2UnverifiedIncidents">—</div><div class="statnote">Require human review</div></div>
+   <div class="card"><div class="statlabel">High / critical</div><div class="statvalue red" id="v2SevereIncidents">—</div><div class="statnote">Self-reported severity, not confirmed risk</div></div>
+   <div class="card"><div class="statlabel">Received today</div><div class="statvalue teal" id="v2TodayIncidents">—</div><div class="statnote">All enabled reporting channels</div></div>
+  </div>
+  <div class="card"><div class="sectionhead"><h2>Geolocated community reports</h2><span class="pill">Coordinates supplied by reporter / officer</span></div><div id="v2IncidentMap" style="height:340px;border-radius:12px;border:1px solid #2b465f;background:#142b3f;overflow:hidden"></div><p class="hint">Only reports with usable coordinates appear here. A map marker is not verification, and missing coordinates do not imply safety.</p></div>
+  <div class="card"><div class="sectionhead"><h2>Unified incident inbox</h2><div class="actions"><button class="btn" id="v2RefreshIncidents">Refresh inbox</button><button class="btn" id="v2ExportIncidents">Export incidents CSV</button></div></div>
+   <div class="filters"><input id="v2IncidentSearch" placeholder="Search reference, location or description"><select id="v2IncidentStatus"><option value="">All statuses</option><option>new</option><option>acknowledged</option><option>in_progress</option><option>resolved</option><option>closed</option><option>rejected</option></select><select id="v2IncidentChannel"><option value="">All channels</option><option>website</option><option>ussd</option><option>email</option><option>sms</option><option>whatsapp</option><option>facebook</option><option>instagram</option><option>x</option><option>sensor</option><option>staff</option></select></div>
+   <div id="v2IncidentTable"><div class="empty">Connect to your organisation cloud workspace to load incidents.</div></div>
+  </div>
+  <div class="notice blue">All incoming community information is unverified until reviewed by an authorised officer. AI triage is advisory only and must not replace emergency judgement or official instructions.</div>
+ </section>
+
+ <section id="page-response" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Create response action</h2></div>
+    <form id="v2TaskForm"><div class="formgrid">
+     <div class="field full"><label>Linked incident</label><select id="v2TaskIncident"><option value="">No linked incident</option></select></div>
+     <div class="field full"><label>Action / task *</label><input id="v2TaskTitle" required placeholder="e.g. Verify reported bridge blockage from a safe location"></div>
+     <div class="field"><label>Assigned team / unit</label><input id="v2TaskTeam" placeholder="Team name or response unit"></div>
+     <div class="field"><label>Assign to staff member</label><select id="v2TaskAssignee"><option value="">Not assigned to a named user</option></select></div>
+     <div class="field"><label>Priority</label><select id="v2TaskPriority"><option>normal</option><option>high</option><option>urgent</option></select></div>
+     <div class="field"><label>Due date</label><input id="v2TaskDue" type="datetime-local"></div>
+     <div class="field"><label>Task status</label><select id="v2TaskStatus"><option>assigned</option><option>accepted</option><option>in_progress</option><option>blocked</option><option>completed</option><option>cancelled</option></select></div>
+     <div class="field full"><label>Instructions / outcome required</label><textarea id="v2TaskNotes" placeholder="Record safe operating constraints, expected outcome and escalation procedure."></textarea></div>
+    </div><div class="actions" style="margin-top:12px"><button class="btn primary">Save response action</button></div></form>
+   </div>
+   <div class="card"><h2 style="font-size:15px">Response workflow</h2><div class="kpirow"><span>1. Acknowledge</span><b>Confirm receipt</b></div><div class="kpirow"><span>2. Assign</span><b>Nominate a team</b></div><div class="kpirow"><span>3. Act safely</span><b>Follow SOPs</b></div><div class="kpirow"><span>4. Record</span><b>Evidence and notes</b></div><div class="kpirow"><span>5. Close</span><b>Supervisor review</b></div><div class="notice">FloodBridge is not a dispatch radio or emergency command authority. Do not send teams into dangerous conditions or rely on unverified community submissions.</div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Response task register</h2><button class="btn" id="v2RefreshTasks">Refresh tasks</button></div><div id="v2TaskTable"><div class="empty">Sign in to view organisation tasks.</div></div></div>
+ </section>
+
+ <section id="page-routes" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Road-network route request</h2><span class="pill">OpenRouteService</span></div>
+    <div class="formgrid"><div class="field"><label>Origin latitude *</label><input id="v2RouteFromLat" type="number" step="any" placeholder="-1.2864"></div><div class="field"><label>Origin longitude *</label><input id="v2RouteFromLon" type="number" step="any" placeholder="36.8172"></div><div class="field"><label>Destination latitude *</label><input id="v2RouteToLat" type="number" step="any" placeholder="-1.2921"></div><div class="field"><label>Destination longitude *</label><input id="v2RouteToLon" type="number" step="any" placeholder="36.8219"></div><div class="field full"><label>Vehicle profile</label><select id="v2RouteProfile"><option value="driving-car">Driving</option><option value="cycling-regular">Cycling</option><option value="foot-walking">Walking</option></select></div></div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" id="v2PlanRoute">Calculate route</button><button class="btn" id="v2UseSiteOrigin">Use first monitored site as origin</button></div><div id="v2RouteResult" class="notice blue">Route analysis requires the organisation's OpenRouteService API key to be installed as a Supabase Edge Function secret.</div>
+   </div>
+   <div class="card"><h2 style="font-size:15px">Route safety and limitations</h2><p class="sub">This service calculates a road-network route using the configured routing provider. FloodBridge compares the route request with current incident records as a review aid. A point report does not define a closed road polygon, and a calculated route is never certified as safe.</p><div id="v2RouteHazards"></div><div class="notice">Do not enter, cross or drive through floodwater. Confirm route conditions with competent local authorities before travel.</div></div>
+  </div>
+ </section>
+
+ <section id="page-integrations" class="hidden">
+  <div class="notice blue">Configure organisation identifiers and public channel details here. Provider passwords, API tokens and signing secrets must be installed in Supabase Edge Function Secrets; they are never saved in this public website. A saved shortcode or social URL records the organisation setting only; it does not activate a telecom or platform account without the provider callback and permissions.</div>
+  <div class="card"><div class="sectionhead"><h2>Institution profile</h2><span class="pill" id="v2ProfileStatus">Not loaded</span></div>
+   <div class="formgrid"><div class="field"><label>Organisation display name</label><input id="v2OrgDisplayName" placeholder="Organisation legal / public name"></div><div class="field"><label>Country / operating region</label><input id="v2OrgRegion" placeholder="e.g. Kenya, East Africa"></div><div class="field"><label>Official website</label><input id="v2OrgWebsite" type="url" placeholder="https://example.org"></div><div class="field"><label>Public contact email</label><input id="v2OrgEmail" type="email" placeholder="info@example.org"></div><div class="field"><label>Emergency contact number</label><input id="v2OrgPhone" placeholder="International format, e.g. +254..."></div><div class="field"><label>Reporting languages</label><input id="v2OrgLanguages" placeholder="English, Kiswahili, ..."></div><div class="field full"><label>Coverage areas</label><textarea id="v2OrgCoverage" placeholder="Counties, districts, countries or operational areas"></textarea></div></div>
+   <div class="actions" style="margin-top:12px"><button class="btn primary" id="v2SaveProfile">Save institution profile</button></div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+   <div class="card"><div class="sectionhead"><h2>USSD community reporting</h2><span class="pill" id="v2UssdStatus">Not configured</span></div>
+    <div class="formgrid"><div class="field"><label>Assigned USSD shortcode</label><input id="v2UssdCode" placeholder="e.g. *XXX#"></div><div class="field"><label>USSD provider</label><select id="v2UssdProvider"><option value="africastalking">Africa's Talking</option><option value="other">Other provider / aggregator</option></select></div><div class="field full"><label>Provider account / service code label</label><input id="v2UssdAccount" placeholder="Provider username or account identifier (not password)"></div></div>
+    <p class="hint">Callback endpoint (after installing the server secret, replace the token placeholder with that exact secret before registering the URL with the provider):</p><input id="v2UssdEndpoint" readonly><div class="actions" style="margin-top:10px"><button class="btn" data-copy="v2UssdEndpoint">Copy callback URL</button><button class="btn primary" id="v2SaveUssd">Save USSD settings</button><button class="btn danger" data-v2-disable="ussd">Disable</button></div>
+   </div>
+   <div class="card"><div class="sectionhead"><h2>Email reporting</h2><span class="pill" id="v2EmailStatus">Not configured</span></div>
+    <div class="formgrid"><div class="field"><label>Public reporting email</label><input id="v2EmailAddress" type="email" placeholder="reports@example.org"></div><div class="field"><label>Inbound email provider</label><select id="v2EmailProvider"><option value="sendgrid">Twilio SendGrid Inbound Parse (supported)</option></select></div><div class="field full"><label>Receiving domain / MX host</label><input id="v2EmailDomain" placeholder="e.g. reports.example.org"></div></div>
+    <p class="hint">SendGrid callback URL (replace the token placeholder with the installed server secret before registering it):</p><input id="v2EmailEndpoint" readonly><div class="actions" style="margin-top:10px"><button class="btn" data-copy="v2EmailEndpoint">Copy webhook URL</button><button class="btn primary" id="v2SaveEmail">Save email settings</button><button class="btn danger" data-v2-disable="email">Disable</button></div>
+   </div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+   <div class="card"><div class="sectionhead"><h2>WhatsApp & social channels</h2><span class="pill" id="v2MetaStatus">Not configured</span></div>
+    <div class="formgrid"><div class="field"><label>WhatsApp Business number</label><input id="v2WhatsAppNumber" placeholder="+254... or international number"></div><div class="field"><label>Facebook Page URL</label><input id="v2FacebookUrl" type="url" placeholder="https://facebook.com/yourpage"></div><div class="field"><label>Instagram Business profile</label><input id="v2InstagramUrl" type="url" placeholder="https://instagram.com/yourprofile"></div><div class="field"><label>X profile URL</label><input id="v2XUrl" type="url" placeholder="https://x.com/youraccount"></div><div class="field full"><label>Other social / community channel URLs</label><textarea id="v2OtherSocial" placeholder="One URL per line"></textarea></div></div>
+    <p class="hint">Meta webhook endpoint for WhatsApp, Facebook Messenger and eligible Instagram Business messaging subscriptions:</p><input id="v2MetaEndpoint" readonly><div class="actions" style="margin-top:10px"><button class="btn" data-copy="v2MetaEndpoint">Copy Meta webhook URL</button><button class="btn primary" id="v2SaveMeta">Save social settings</button><button class="btn danger" data-v2-disable="meta">Disable</button></div>
+    <p class="hint">Signed webhook bridge endpoint for X or another approved social integration service:</p><input id="v2SocialBridgeEndpoint" readonly><div class="formgrid"><div class="field"><label>Bridge / automation provider label</label><input id="v2SocialBridgeProvider" placeholder="Approved social integration service"></div><div class="field"><label>Bridge status</label><span class="pill" id="v2SocialBridgeStatus">Not configured</span></div></div><div class="actions" style="margin-top:10px"><button class="btn" data-copy="v2SocialBridgeEndpoint">Copy signed bridge URL</button><button class="btn primary" id="v2SaveSocialBridge">Enable signed bridge</button><button class="btn danger" data-v2-disable="social_bridge">Disable</button></div>
+    <div class="notice">Adding a social profile URL does not grant message access. Meta app review, permissions, connected business assets and webhook subscriptions are required. X requires its own approved developer API or a supported third-party webhook bridge that signs each event with the configured server secret.</div>
+   </div>
+   <div class="card"><div class="sectionhead"><h2>SMS & outbound notifications</h2><span class="pill" id="v2SmsStatus">Not configured</span></div>
+    <div class="formgrid"><div class="field"><label>SMS provider</label><select id="v2SmsProvider"><option value="twilio">Twilio (supported)</option></select></div><div class="field"><label>SMS sender ID / number</label><input id="v2SmsSender" placeholder="Approved sender ID / number"></div><div class="field"><label>Official notification email</label><input id="v2NotifyEmail" type="email" placeholder="operations@example.org"></div><div class="field"><label>WhatsApp sender phone-number ID</label><input id="v2MetaPhoneId" placeholder="Meta Cloud API phone number ID"></div></div>
+    <p class="hint">Twilio inbound SMS / WhatsApp callback endpoint:</p><input id="v2TwilioEndpoint" readonly><div class="actions" style="margin-top:10px"><button class="btn" data-copy="v2TwilioEndpoint">Copy Twilio callback URL</button><button class="btn primary" id="v2SaveNotify">Save notification settings</button><button class="btn danger" data-v2-disable="notify">Disable</button></div>
+   </div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+   <div class="card"><div class="sectionhead"><h2>Integration readiness</h2><button class="btn" id="v2CheckIntegrations">Check backend secrets</button></div><div id="v2Readiness"><div class="empty">Run the check after deploying the V2 Edge Functions.</div></div></div>
+   <div class="card"><div class="sectionhead"><h2>AI & routing services</h2></div><p class="sub">AI-assisted incident triage uses an organisation-controlled OpenAI API key. Road routing uses an OpenRouteService API key. Keys are configured only as Supabase Edge Function secrets.</p><div class="kpirow"><span>AI incident triage</span><b id="v2AiStatus">Check required</b></div><div class="kpirow"><span>Road-network routing</span><b id="v2RoutingStatus">Check required</b></div><div class="kpirow"><span>Cloud database</span><b id="v2CloudStatus">Not connected</b></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h2 style="font-size:15px">Secret names to install in Supabase</h2><p class="sub">See <b>DEPLOYMENT-V2.md</b> for exact setup. Never paste these secrets into this page or into config.js.</p><div id="v2SecretList" class="sub" style="line-height:1.9;font-family:ui-monospace,monospace">USSD_WEBHOOK_SECRET · SENDGRID_INBOUND_SECRET · META_VERIFY_TOKEN · META_APP_SECRET · META_ACCESS_TOKEN · META_PHONE_NUMBER_ID · META_GRAPH_VERSION · RESEND_API_KEY · MAIL_FROM · TWILIO_ACCOUNT_SID · TWILIO_AUTH_TOKEN · TWILIO_FROM · OPENAI_API_KEY · OPENAI_TRIAGE_MODEL · ORS_API_KEY · SOCIAL_WEBHOOK_SECRET · RATE_LIMIT_PEPPER</div></div>
+ </section>
+
+
+ <section id="page-notifications" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Send operational notification</h2><span class="pill">Provider-backed</span></div>
+    <form id="v2NotifyForm"><div class="formgrid"><div class="field"><label>Delivery channel</label><select id="v2NotifyChannel"><option value="email">Email · Resend</option><option value="sms">SMS · Twilio</option><option value="whatsapp">WhatsApp · Meta Cloud API</option></select></div><div class="field"><label>Recipient address / phone</label><input id="v2NotifyTo" required placeholder="Email or international phone number"></div><div class="field full"><label>Email subject (email only)</label><input id="v2NotifySubject" placeholder="FloodBridge incident update"></div><div class="field full"><label>Message *</label><textarea id="v2NotifyMessage" required maxlength="3000" placeholder="Write a verified operational update. Do not send unverified claims as official warnings."></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn primary">Send notification</button><button class="btn" type="reset">Clear</button></div></form>
+    <div class="notice">Messages are sent only after the relevant provider credentials are installed and verified. Provider acceptance is not proof that a recipient read the message. Use approved templates / opt-in rules where required.</div>
+   </div>
+   <div class="card"><h2 style="font-size:15px">Delivery controls</h2><div class="kpirow"><span>Email</span><b>Resend API</b></div><div class="kpirow"><span>SMS</span><b>Twilio Messaging</b></div><div class="kpirow"><span>WhatsApp</span><b>Meta Cloud API</b></div><div class="kpirow"><span>Access</span><b>Admin / Editor</b></div><p class="sub">All outbound actions are recorded in the organisation message log. When notification email, Resend credentials and the enabled notification channel are configured, new incidents can also trigger an automatic email to the saved operations address. SMS / WhatsApp messages are operator-initiated in this release. Avoid mass messaging until consent, escalation rules and provider compliance have been reviewed by the organisation.</p></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="sectionhead"><h2>Communication log</h2><button class="btn" id="v2RefreshMessages">Refresh log</button></div><div id="v2MessageLog"><div class="empty">Sign in to load communication history.</div></div></div>
+ </section>
+ <section id="page-community" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Public community reporting portal</h2><span class="pill">No staff login required</span></div><p class="sub">Share a public link with community members. Reports are submitted securely to the organisation's incident inbox through the deployed community-intake Edge Function. Community members can check limited report status using their reference number.</p><div class="field"><label>Public portal URL</label><input id="v2CommunityUrl" readonly></div><div class="actions" style="margin-top:12px"><button class="btn primary" id="v2OpenCommunity">Open public reporting portal</button><button class="btn" data-copy="v2CommunityUrl">Copy link</button></div><div class="notice blue">Before sharing publicly, deploy the backend functions, set the organisation's public intake ID in config.js, review privacy wording and run controlled tests.</div></div>
+   <div class="card"><h2 style="font-size:15px">Accessible reporting</h2><div class="kpirow"><span>Smartphone users</span><b>Website form</b></div><div class="kpirow"><span>Feature-phone users</span><b>USSD shortcode</b></div><div class="kpirow"><span>Email users</span><b>Inbound email parser</b></div><div class="kpirow"><span>Messaging users</span><b>Connected social APIs</b></div><p class="sub">The public form asks only for information needed to understand and locate the incident. A reporter can choose not to provide a name. Phone number collection must be explained and governed by the organisation's privacy policy.</p></div>
+  </div>
+ </section>
+ <section id="page-settings" class="hidden">
+  <div class="grid two">
+   <div class="card"><div class="sectionhead"><h2>Cloud workspace</h2><span class="pill" id="cloudPill">NOT CONNECTED</span></div>
+    <div id="sbConfigBox"><div class="formgrid"><div class="field full"><label>Supabase project URL</label><input id="sbUrl" type="url" placeholder="https://your-project.supabase.co"></div><div class="field full"><label>Supabase anon / publishable key</label><input id="sbKey" type="password" placeholder="sb_publishable_… or anon JWT"></div></div><p class="hint">Public key only — never a service_role key. Administrators can pre-fill these once in config.js so staff never see this box.</p></div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" id="cloudConnect">Connect</button><button class="btn" id="cloudLogin">Sign in</button><button class="btn" id="cloudSignup">Create account</button><button class="btn" id="cloudLogout">Sign out</button></div>
+    <div class="kpirow"><span>Account</span><b id="cloudUser">Not signed in</b></div><div class="kpirow"><span>Organisation</span><b id="cloudOrg">—</b></div><div class="kpirow"><span>Your role</span><b id="cloudRole">—</b></div><div class="kpirow"><span>Sync</span><b id="cloudSync">Local only</b></div><div class="kpirow"><span>Pending uploads</span><b id="pendingCount">0</b></div>
+   </div>
+   <div class="card"><div class="sectionhead"><h2>Organisation & team</h2></div>
+    <div id="orgSetup"><p class="sub">Sign in, then create your organisation or join an existing one with a join code from its administrator.</p></div>
+    <div id="orgJoinBox" class="hidden"><div class="formgrid"><div class="field"><label>Create organisation</label><input id="orgName" placeholder="e.g. County Disaster Management"></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="orgCreate" type="button">Create</button></div><div class="field"><label>Join with code</label><input id="orgCode" placeholder="Join code"></div><div class="field"><label>&nbsp;</label><button class="btn" id="orgJoin" type="button">Join (read-only until promoted)</button></div></div></div>
+    <div id="orgAdminBox" class="hidden"><div class="kpirow"><span>Join code (share privately)</span><b id="orgJoinCode">—</b></div><div class="actions"><button class="btn sm" id="rotateCode">Rotate join code</button></div><div id="memberList" style="margin-top:12px"></div></div>
+   </div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+   <div class="card"><div class="sectionhead"><h2>Operating parameters</h2></div>
+    <div class="formgrid"><div class="field"><label>Fresh window</label><select id="freshMin"><option value="60">60 minutes</option><option value="120">120 minutes</option><option value="180">180 minutes</option><option value="240">240 minutes</option></select></div><div class="field"><label>Aging window (then expired)</label><select id="agingMin"><option value="240">4 hours</option><option value="360">6 hours</option><option value="720">12 hours</option><option value="1440">24 hours</option></select></div></div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" id="saveParams">Save parameters</button><button class="btn" id="alertsBtn">Enable browser alerts</button></div>
+    <p class="hint">Applies to this device. Alerts fire for new fresh blocked-crossing reports while the tab is open; they are not an official warning service.</p>
+   </div>
+   <div class="card"><div class="sectionhead"><h2>Data & privacy</h2></div>
+    <div class="kpirow"><span>Local records</span><b id="localCount">0</b></div>
+    <div class="actions" style="margin-top:10px"><button class="btn" onclick="exportJSON()">Download backup</button><button class="btn" id="importBtn">Restore from backup</button><button class="btn danger" id="clearLocal">Clear local data</button></div><input type="file" id="importFile" accept="application/json" class="hidden">
+    <p class="hint">Clearing local data does not delete cloud records. Avoid names, phone numbers and household locations unless you have an approved operational need.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="page-research" class="hidden"><div class="card"><div class="eyebrow">About</div><h2>FloodBridge — evidence-to-access intelligence</h2>
+  <p class="sub">FloodBridge is a decision-support layer that links crossing observations and water-level measurements to manually mapped dependencies for health facilities, shelters, schools, water points and other essential services.</p>
+  <div class="grid three" style="margin-top:16px"><div class="card"><h3 style="font-size:13px">Problem hypothesis</h3><p class="sub">Communities and response teams may receive hazard messages but still lack timely, location-specific evidence about which crossings and essential-service connections are affected.</p></div><div class="card"><h3 style="font-size:13px">Proposed contribution</h3><p class="sub">Track report freshness, contradictory evidence, instrument provenance and manually mapped lifeline dependencies in one low-bandwidth workflow.</p></div><div class="card"><h3 style="font-size:13px">Initial users</h3><p class="sub">County disaster teams, road agencies, community responders, utilities, health networks, schools and humanitarian logistics teams.</p></div></div>
+  <h3 style="font-size:14px">Research caution</h3><p class="sub">Flood early-warning services and community flood reporting already exist. FloodNavigator in Accra is an example of a community-driven flood-information platform. Kenya's Tana River Basin has a UNESCO-supported flood early-warning system. FloodBridge's differentiator is therefore a hypothesis around auditable crossing evidence and lifeline-access dependencies—not a claim that flood alerts or community maps are new.</p>
+  <h3 style="font-size:14px">Potential institutional outreach</h3><p class="sub">Potential discussion targets include JKUAT, Kenya Meteorological Department, Water Resources Authority, Kenya National Highways Authority, Kenya Urban Roads Authority, county disaster-management teams, Kenya Red Cross, humanitarian mapping groups and local universities. These are prospects only; no relationship or endorsement is implied.</p>
+  <h3 style="font-size:14px">Operational boundaries</h3><ul class="sub" style="line-height:1.9"><li>No official warning issuance or automatic connection to national emergency dispatch.</li><li>No automatic safe-route certification or road-closure authority.</li><li>No flood depth inference from rainfall alone.</li><li>When configured, route planning returns a baseline road-network route; it does not guarantee a flood-safe route or automatically remove every flooded segment.</li><li>Community reports can be unverified, wrong, stale, duplicated or malicious; review before acting.</li><li>Hydrological thresholds must be site-specific and approved by competent authorities.</li></ul>
+ </div></section>
+ <footer>FloodBridge V2 · Evidence before confidence · Follow official safety instructions</footer>
+</main></div>
+
+<div class="modalbg" id="authModal"><div class="modal"><h2 id="authTitle" style="margin-top:0">Sign in</h2><div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="username"></div><div class="field" style="margin-top:10px"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password"></div><p class="hint" id="authNote"></p><div class="actions" style="margin-top:12px"><button class="btn primary" id="authSubmit">Continue</button><button class="btn" id="authCancel">Cancel</button></div></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="config.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const TITLES={overview:["Flood impact command overview","Connect flood observations to crossing status and essential-service access."],map:["Map & monitored sites","Locate registered crossings, gauges and recent observations."],report:["Submit a flood observation","Record what was observed, where and when—without entering floodwater."],events:["Observation register","Review reported conditions, evidence freshness and conflicts."],assets:["Lifeline assets","Map essential services and their manually defined crossing dependencies."],forecast:["Rainfall outlook","Retrieve forecast rainfall for a selected monitored location."],devices:["Sensor connections","Connect compatible ESP32 telemetry through BLE or USB serial."],reports:["Reports & exports","Back up locally stored evidence and produce a situation summary."],incidents:["Institutional incident inbox","Receive and manage community, sensor, email, USSD and social-channel incidents."],response:["Response coordination","Assign response actions, track teams and record closure evidence."],routes:["Route & accessibility analysis","Compare road-network routes and review nearby reported hazards before decisions."],integrations:["Integrations & communication channels","Configure institutional identity, inbound reporting channels and secure provider connections."],notifications:["Notification centre","Send authorised email, SMS and WhatsApp updates and review delivery records."],community:["Community reporting access","Share a public reporting portal with people who do not have FloodBridge accounts."],settings:["Settings & team","Cloud workspace, organisation roles, operating parameters and data."],research:["About & limitations","Scope, boundaries, prior work and validation needs."]};
+const STORAGE="floodbridge_state_v1";
+const DEFAULTS=()=>({sites:[],observations:[],assets:[],telemetry:[],settings:{freshMin:120,agingMin:360},pending:[],alertsOn:false,deviceMap:{}});
+let state=(()=>{let x={};try{x=JSON.parse(localStorage.getItem(STORAGE)||"{}")}catch(e){}let d=Object.assign(DEFAULTS(),x);d.settings=Object.assign({freshMin:120,agingMin:360},x.settings||{});const demo=r=>String(r.id||"").startsWith("DEMO-");d.sites=d.sites.filter(r=>!demo(r));d.observations=d.observations.filter(r=>!demo(r)&&!String(r.siteId||"").startsWith("DEMO-"));d.assets=d.assets.filter(r=>!demo(r));return d})();
+const cloud={client:null,user:null,org:null,role:null,members:[],channel:null};
+const siteRain={};
+let maps={}, bleDevice=null, bleServer=null, bleChar=null, serialPort=null, serialReader=null, lineBuffer="";
+let lastWeather=null;
+function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){toast("Browser storage is full or blocked. Download a backup and clear old data.","error")}renderAll()}
+function go(page){document.querySelectorAll("main section").forEach(x=>x.classList.add("hidden"));document.getElementById("page-"+page).classList.remove("hidden");document.querySelectorAll("nav button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));document.getElementById("pageTitle").textContent=TITLES[page][0];document.getElementById("pageSub").textContent=TITLES[page][1];if(page==="map"){setTimeout(()=>{initMap("mainMap");refreshMap("mainMap");if(maps.mainMap)maps.mainMap.invalidateSize()},120);renderSites()}if(page==="events")renderEvents();if(page==="assets")renderAssets();if(page==="devices")renderTelemetry();if(page==="reports")renderReportSummary();if(page==="forecast"){fillForecastSites();if(!lastWeather&&forecastLat.value)loadForecast()}if(page==="settings"){freshMin.value=state.settings.freshMin;agingMin.value=state.settings.agingMin;renderSettings()}if(window.renderV2Page)window.renderV2Page(page)}
+document.getElementById("nav").addEventListener("click",e=>{let b=e.target.closest("button[data-page]");if(b)go(b.dataset.page)});
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function uid(prefix){return prefix+"-"+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,10))}
+function toast(m,t){const el=document.createElement("div");el.className="toast "+(t||"");el.textContent=m;document.getElementById("toasts").append(el);setTimeout(()=>el.remove(),5200)}
+const $=id=>document.getElementById(id);
+function ageMinutes(d){return Math.max(0,(Date.now()-new Date(d).getTime())/60000)}
+function freshness(o){let mins=ageMinutes(o.observedAt);return mins<=state.settings.freshMin?"fresh":mins<=state.settings.agingMin?"aging":"expired"}
+function statusEvidence(siteId){let subset=state.observations.filter(o=>o.siteId===siteId&&o.passability&&o.passability!=="unknown"&&o.verification!=="rejected"&&freshness(o)!=="expired").sort((a,b)=>new Date(b.observedAt)-new Date(a.observedAt));if(!subset.length)return {label:"No fresh report",cls:"gray",latest:null};let recent=subset.filter(o=>ageMinutes(o.observedAt)<=state.settings.freshMin);let statuses=[...new Set(recent.map(o=>o.passability).filter(x=>x!=="unknown"))];let blocked=recent.filter(o=>o.passability==="blocked").length;let clear=recent.filter(o=>o.passability==="clear").length;if(blocked&&clear)return {label:"Conflicting reports",cls:"bad",latest:subset[0]};if(recent[0]&&recent[0].verification==="verified"){let ps=recent[0].passability;return {label:"Verified · "+ps,cls:ps==="blocked"?"bad":ps==="clear"?"good":"warn",latest:subset[0]}}let matching=recent.filter(o=>o.passability===recent[0]?.passability);if(recent.length>1&&matching.length>1)return {label:"Corroborated · "+recent[0].passability,cls:recent[0].passability==="blocked"?"bad":"good",latest:subset[0]};return {label:"Unverified · "+(subset[0].passability||"observation"),cls:"warn",latest:subset[0]}}
+function updateSelects(){let siteOptions='<option value="">Unlinked / choose coordinates</option>'+state.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");document.getElementById("obsSite").innerHTML=siteOptions;let asset='<option value="">No dependency mapped</option>'+state.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");document.getElementById("assetDependency").innerHTML=asset;let device='<option value="">Select site for device data</option>'+state.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");document.getElementById("deviceSite").innerHTML=device;fillForecastSites()}
+document.getElementById("obsSite").addEventListener("change",e=>{let site=state.sites.find(s=>s.id===e.target.value);if(site){document.getElementById("obsLat").value=site.lat;document.getElementById("obsLon").value=site.lon}});
+/* handlers are defined in the production block below */
+function validCoords(a,b){return Number.isFinite(a)&&Number.isFinite(b)&&a>=-90&&a<=90&&b>=-180&&b<=180}
+function localDateTime(){let d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,16)}
+function useCurrentLocation(){if(!navigator.geolocation){alert("Location is not available in this browser.");return}navigator.geolocation.getCurrentPosition(pos=>{obsLat.value=pos.coords.latitude;obsLon.value=pos.coords.longitude},err=>alert("Could not read location: "+err.message),{enableHighAccuracy:true,timeout:12000})}
+function locateMe(){if(!navigator.geolocation)return alert("Location is unavailable.");navigator.geolocation.getCurrentPosition(p=>{let m=maps.mainMap;if(m)m.setView([p.coords.latitude,p.coords.longitude],14)},e=>alert(e.message),{enableHighAccuracy:true,timeout:12000})}
+function initMap(id){if(maps[id])return;let el=document.getElementById(id);if(!el)return;if(!window.L){el.innerHTML='<div style="padding:24px;color:#b8cad9;font-size:12px">Map library unavailable. Site and observation records are still saved; reconnect to the internet to load the map.</div>';return}let m=L.map(id,{zoomControl:true}).setView([-1.2864,36.8172],6);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(m);maps[id]=m}
+function refreshMap(id){let m=maps[id];if(!m)return;m.eachLayer(l=>{if(l instanceof L.Marker||l instanceof L.CircleMarker)m.removeLayer(l)});let pts=[];state.sites.forEach(s=>{let ev=statusEvidence(s.id);let color=ev.cls==="bad"?"#ff7777":ev.cls==="good"?"#7ce0ac":"#f4bc61";L.circleMarker([s.lat,s.lon],{radius:9,color,fillColor:color,fillOpacity:.85,weight:2}).addTo(m).bindPopup(`<b>${esc(s.name)}</b><br>${esc(s.type)}<br>${esc(ev.label)}`);pts.push([s.lat,s.lon])});state.observations.slice(0,100).forEach(o=>{let color=o.passability==="blocked"?"#ff7777":o.passability==="caution"?"#f4bc61":"#80bfff";L.circleMarker([o.lat,o.lon],{radius:5,color,fillColor:color,fillOpacity:.8,weight:1}).addTo(m).bindPopup(`<b>${esc(o.type)}</b><br>${esc(o.passability)}<br>${esc(o.notes.slice(0,130))}<br>${new Date(o.observedAt).toLocaleString()}`);pts.push([o.lat,o.lon])});state.assets.forEach(a=>{L.circleMarker([a.lat,a.lon],{radius:6,color:"#48dbc0",fillColor:"#0b1a29",fillOpacity:1,weight:3}).addTo(m).bindPopup(`<b>${esc(a.name)}</b><br>${esc(a.type)} · ${esc(a.criticality)} criticality`);pts.push([a.lat,a.lon])});if(pts.length)m.fitBounds(pts,{padding:[20,20],maxZoom:id==="mainMap"?13:10})}
+function fitMap(){if(!maps.mainMap)return;let pts=[...state.sites.map(s=>[s.lat,s.lon]),...state.observations.map(o=>[o.lat,o.lon])];if(pts.length)maps.mainMap.fitBounds(pts,{padding:[20,20],maxZoom:13})}
+function renderSites(){document.getElementById("siteCount").textContent=state.sites.length+" sites";let el=document.getElementById("siteTable");el.innerHTML=state.sites.length?`<table><thead><tr><th>Site</th><th>Coordinates</th><th>Latest evidence</th><th>Rain 24h</th><th></th></tr></thead><tbody>${state.sites.map(s=>{let e=statusEvidence(s.id);let r=siteRain[s.id];return `<tr><td><b>${esc(s.name)}</b><br><span class="sub">${esc(s.type)}</span></td><td>${Number(s.lat).toFixed(4)}, ${Number(s.lon).toFixed(4)}</td><td><span class="tag ${e.cls==="bad"?"bad":e.cls==="warn"?"warn":e.cls==="gray"?"gray":""}">${esc(e.label)}</span></td><td>${r?r.mm.toFixed(1)+" mm":"—"}</td><td><div class="rowbtns"><button class="btn sm" data-act="site-edit" data-id="${esc(s.id)}">Edit</button><button class="btn sm danger" data-act="site-del" data-id="${esc(s.id)}">Delete</button></div></td></tr>`}).join("")}</tbody></table>`:'<div class="empty">No sites registered. Add a crossing or gauge above.</div>';updateSelects()}
+function renderEvents(){let el=document.getElementById("eventTable");let q=(evSearch.value||"").toLowerCase(),v=evVer.value,fr=evFresh.value;let list=state.observations.filter(o=>{let s=state.sites.find(s=>s.id===o.siteId);if(v&&(o.verification||"unverified")!==v)return false;if(fr&&freshness(o)!==fr)return false;if(q&&![o.notes,o.observer,o.type,s?.name,o.submittedBy].join(" ").toLowerCase().includes(q))return false;return true});if(!list.length){el.innerHTML='<div class="empty">No observations match. Submit a field report or adjust the filters.</div>';return}el.innerHTML=`<table><thead><tr><th>Type / location</th><th>Reported condition</th><th>Source & freshness</th><th>Observed at</th><th></th></tr></thead><tbody>${list.slice(0,300).map(o=>{let s=state.sites.find(s=>s.id===o.siteId);let f=freshness(o);let ver=o.verification||"unverified";return `<tr><td><b>${esc(o.type)}</b><br><span class="sub">${esc(s?.name||"Unlinked observation")}</span></td><td><span class="tag ${o.passability==="blocked"?"bad":o.passability==="caution"?"warn":o.passability==="clear"?"":"gray"}">${esc(o.passability)}</span><br><span class="sub">${o.stageM?esc(o.stageM)+" m stage":""} ${o.depthCm?esc(o.depthCm)+" cm depth":""}</span></td><td>${esc(o.source)}<br><span class="tag ${f==="fresh"?"":f==="aging"?"warn":"gray"}">${f}</span> <span class="tag ${ver==="verified"?"":ver==="rejected"?"bad":"info"}">${esc(ver)}</span></td><td>${new Date(o.observedAt).toLocaleString()}</td><td><div class="rowbtns"><button class="btn sm" data-act="obs-detail" data-id="${esc(o.id)}">Details</button><button class="btn sm" data-act="obs-verify" data-id="${esc(o.id)}">Verify</button><button class="btn sm" data-act="obs-reject" data-id="${esc(o.id)}">Reject</button><button class="btn sm danger" data-act="obs-del" data-id="${esc(o.id)}">Delete</button></div></td></tr>`}).join("")}</tbody></table>`}
+function showObservation(id){let o=state.observations.find(x=>x.id===id);if(!o)return;let s=state.sites.find(x=>x.id===o.siteId);reportDetail.innerHTML=`<b>${esc(o.id)} · ${esc(o.type)}</b><p>${esc(o.notes)}</p><p>Location: ${Number(o.lat).toFixed(5)}, ${Number(o.lon).toFixed(5)} · ${esc(s?.name||"Unlinked")}</p><p>Passability: ${esc(o.passability)} · Source: ${esc(o.source)} · Freshness: ${freshness(o)}</p><p>Depth: ${esc(o.depthCm||"not provided")} cm · Stage: ${esc(o.stageM||"not provided")} m</p><p>Observed: ${new Date(o.observedAt).toLocaleString()} · Submitted by: ${esc(o.submittedBy||o.observer||"—")} · Verification: ${esc(o.verification||"unverified")}${o.verifiedBy?" by "+esc(o.verifiedBy):""}</p>`;go("reports")}
+function renderAssets(){let impacts=state.assets.map(a=>{let dep=state.sites.find(s=>s.id===a.dependency);let ev=dep?statusEvidence(dep.id):null;return {a,dep,ev}});assetImpact.innerHTML=impacts.length?impacts.map(x=>`<div class="kpirow"><span><b>${esc(x.a.name)}</b><br><span class="sub">${esc(x.a.type)} · ${esc(x.a.criticality)} criticality</span></span><span class="tag ${x.ev?.cls||"gray"}">${esc(x.ev?.label||"No mapped evidence")}</span></div>`).join(""):'<div class="empty">No assets registered.</div>';assetTable.innerHTML=state.assets.length?`<table><thead><tr><th>Asset</th><th>Location</th><th>Dependency</th><th></th></tr></thead><tbody>${state.assets.map(a=>`<tr><td>${esc(a.name)}<br><span class="sub">${esc(a.type)} · ${esc(a.criticality)}</span></td><td>${Number(a.lat).toFixed(4)}, ${Number(a.lon).toFixed(4)}</td><td>${esc(state.sites.find(s=>s.id===a.dependency)?.name||"Not linked")}</td><td><div class="rowbtns"><button class="btn sm" data-act="asset-edit" data-id="${esc(a.id)}">Edit</button><button class="btn sm danger" data-act="asset-del" data-id="${esc(a.id)}">Delete</button></div></td></tr>`).join("")}</tbody></table>`:'<div class="empty">No lifeline assets saved.</div>'}
+function renderTelemetry(){let el=document.getElementById("telemetryTable");el.innerHTML=state.telemetry.length?`<table><thead><tr><th>Device</th><th>Site</th><th>Distance</th><th>Stage</th><th>Health</th><th>Received</th></tr></thead><tbody>${state.telemetry.slice(0,30).map(t=>`<tr><td>${esc(t.device_id||"Unknown")}</td><td>${esc(state.sites.find(s=>s.id===t.siteId)?.name||"Unassigned")}</td><td>${t.distance_cm==null?"—":esc(t.distance_cm)+" cm"}</td><td>${t.stage_m==null?"Not configured":esc(t.stage_m)+" m"}</td><td>${esc(t.health||"—")}</td><td>${new Date(t.receivedAt).toLocaleString()}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">No sensor readings received yet.</div>';renderRegistry()}
+function renderRegistry(){let el=$("deviceRegistry");if(!el)return;let last={};for(const t of state.telemetry){if(!last[t.device_id])last[t.device_id]=t}let ids=Object.keys(last);el.innerHTML=ids.length?`<table><thead><tr><th>Device</th><th>Assigned site</th><th>Last seen</th><th>Status</th></tr></thead><tbody>${ids.map(id=>{let t=last[id],mins=ageMinutes(t.receivedAt),on=mins<=5,site=state.deviceMap[id]||t.siteId||"";return `<tr><td>${esc(id)}</td><td><select data-act="device-site" data-id="${esc(id)}"><option value="">Unassigned</option>${state.sites.map(s=>`<option value="${esc(s.id)}" ${s.id===site?"selected":""}>${esc(s.name)}</option>`).join("")}</select></td><td>${new Date(t.receivedAt).toLocaleString()}<br><span class="sub">${t.stage_m==null?"stage not configured":esc(t.stage_m)+" m"} · ${esc(t.health||"—")}</span></td><td><span class="statusdot ${on?"on":"warn"}"></span>${on?"Online":"No signal "+Math.round(mins)+" min"}</td></tr>`}).join("")}</tbody></table>`:'<div class="empty">No devices have reported yet.</div>'}
+function siteBlocked(s){return state.observations.some(o=>o.siteId===s.id&&o.passability==="blocked"&&o.verification!=="rejected"&&freshness(o)!=="expired")||statusEvidence(s.id).label.startsWith("Conflicting")}
+function affectedAssets(){return state.assets.map(a=>{let s=state.sites.find(x=>x.id===a.dependency);if(!s)return null;let ev=statusEvidence(s.id);return siteBlocked(s)?{a,s,ev}:null}).filter(Boolean)}
+function renderReportSummary(){let ver=k=>state.observations.filter(o=>(o.verification||"unverified")===k).length;let af=affectedAssets();summaryReport.innerHTML=`<div class="kpirow"><span>Registered sites</span><b>${state.sites.length}</b></div><div class="kpirow"><span>Observations (verified / unverified / rejected)</span><b>${ver("verified")} / ${ver("unverified")} / ${ver("rejected")}</b></div><div class="kpirow"><span>Lifeline assets</span><b>${state.assets.length}</b></div><div class="kpirow"><span>Device messages stored</span><b>${state.telemetry.length}</b></div><h3 style="font-size:13px;margin:14px 0 4px">Assets with access at risk now</h3>${af.length?af.map(x=>`<div class="kpirow"><span><b>${esc(x.a.name)}</b><br><span class="sub">via ${esc(x.s.name)}</span></span><span class="tag bad">${esc(x.ev.label)}</span></div>`).join(""):'<div class="sub">None indicated by current evidence. This is not confirmation that access is safe.</div>'}<p class="sub">Generated ${new Date().toLocaleString()}${cloud.org?" · "+esc(cloud.org.name):""}</p>`}
+function renderOverview(){kSites.textContent=state.sites.length;kFresh.textContent=state.observations.filter(o=>freshness(o)==="fresh").length;kBlocked.textContent=state.observations.filter(o=>o.passability==="blocked"&&freshness(o)!=="expired").length;let affected=state.assets.filter(a=>{let s=state.sites.find(x=>x.id===a.dependency);return s&&state.observations.some(o=>o.siteId===s.id&&o.passability==="blocked"&&freshness(o)!=="expired")});kAssets.textContent=affected.length;let recent=state.observations.slice(0,6);latestList.innerHTML=recent.length?recent.map(o=>`<div class="kpirow"><span><b>${esc(state.sites.find(s=>s.id===o.siteId)?.name||o.type)}</b><br><span class="sub">${new Date(o.observedAt).toLocaleString()}</span></span><span class="tag ${o.passability==="blocked"?"bad":o.passability==="caution"?"warn":""}">${esc(o.passability)}</span></div>`).join(""):'<div class="empty">No current observations. Add a monitored site and submit an observation.</div>';let counts=[state.observations.filter(o=>freshness(o)==="fresh").length,state.observations.filter(o=>freshness(o)==="aging").length,state.observations.filter(o=>freshness(o)==="expired").length],max=Math.max(1,...counts);evidenceBars.innerHTML=counts.map((v,i)=>`<div class="barcol"><div class="bar" style="height:${v/max*100}%"></div><small>${["Fresh","Aging","Expired"][i]} · ${v}</small></div>`).join("");let bl=state.sites.filter(siteBlocked);let af=affectedAssets();alertBanner.innerHTML=bl.length?`<div class="notice" style="border-color:#7a3a42;background:#3a1f26;color:#ffc4c4"><b>${bl.length} crossing${bl.length>1?"s":""} with blocked / conflicting evidence:</b> ${bl.map(s=>esc(s.name)).join(", ")}${af.length?` · <b>${af.length} lifeline asset${af.length>1?"s":""} potentially cut off</b>`:""}. Evidence is unverified unless marked; follow official instructions.</div>`:"";let rl=state.sites.filter(s=>siteRain[s.id]).sort((a,b)=>siteRain[b.id].mm-siteRain[a.id].mm).slice(0,6);rainList.innerHTML=rl.length?rl.map(s=>`<div class="kpirow"><span>${esc(s.name)}</span><b>${siteRain[s.id].mm.toFixed(1)} mm</b></div>`).join(""):'<div class="empty">'+(state.sites.length?"Loading forecast…":"Register sites to see forecast rainfall.")+'</div>';initMap("mapOverview");refreshMap("mapOverview")}
+function renderAll(){renderOverview();renderSites();renderEvents();renderAssets();renderTelemetry();renderReportSummary();updateSelects();renderSettings()}
+function download(name,content,mime){let a=document.createElement("a"),u=URL.createObjectURL(new Blob([content],{type:mime}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1200)}
+function exportJSON(){download("floodbridge-backup.json",JSON.stringify({app:"FloodBridge",version:"2.0.0",exportedAt:new Date().toISOString(),state:{sites:state.sites,observations:state.observations,assets:state.assets,telemetry:state.telemetry}},null,2),"application/json")}
+function csvFrom(name,cols,rows){let q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';download(name,[cols.join(","),...rows.map(o=>cols.map(c=>q(o[c])).join(","))].join("\n"),"text/csv")}
+function exportCSV(){csvFrom("floodbridge-observations.csv",["id","type","siteId","passability","depthCm","stageM","source","verification","verifiedBy","lat","lon","observer","submittedBy","observedAt","notes"],state.observations)}
+function exportKind(k){const m={sites:["floodbridge-sites.csv",["id","name","type","lat","lon","datum","watchLevel","alertLevel","actionLevel","notes"]],assets:["floodbridge-assets.csv",["id","name","type","lat","lon","criticality","dependency","notes"]],telemetry:["floodbridge-telemetry.csv",["id","device_id","siteId","distance_cm","stage_m","health","receivedAt"]]}[k];csvFrom(m[0],m[1],state[k])}
+function fillForecastSites(){let sel=document.getElementById("forecastSite");if(!sel)return;sel.innerHTML='<option value="">Choose a monitored site</option>'+state.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");if(state.sites.length&& !forecastLat.value){forecastLat.value=state.sites[0].lat;forecastLon.value=state.sites[0].lon}}
+forecastSite?.addEventListener("change",()=>copyForecastCoords());
+function copyForecastCoords(){let s=state.sites.find(x=>x.id===forecastSite.value);if(s){forecastLat.value=s.lat;forecastLon.value=s.lon}}
+async function loadForecast(){let lat=Number(forecastLat.value),lon=Number(forecastLon.value);if(!validCoords(lat,lon)){forecastStatus.textContent="Enter valid coordinates.";return}forecastStatus.textContent="Requesting forecast from Open-Meteo…";forecastSummary.textContent="Loading…";forecastHours.innerHTML="";try{let url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation,precipitation_probability&daily=precipitation_sum,precipitation_probability_max&forecast_days=2&timezone=auto`;let r=await fetch(url);if(!r.ok)throw new Error("Forecast service returned "+r.status);let d=await r.json();lastWeather=d;let times=d.hourly?.time||[];let targetHour=new Intl.DateTimeFormat("sv-SE",{timeZone:d.timezone||"UTC",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",hourCycle:"h23"}).format(new Date()).replace(" ","T").slice(0,13);let startIndex=times.findIndex(t=>t.slice(0,13)>=targetHour);if(startIndex<0)startIndex=0;let precip24=(d.hourly?.precipitation||[]).slice(startIndex,startIndex+24);let probs=(d.hourly?.precipitation_probability||[]).slice(startIndex,startIndex+24);let sum=precip24.reduce((a,b)=>a+(Number(b)||0),0);let pmax=probs.length?Math.max(...probs):null;forecastStatus.textContent=`Forecast received · ${d.timezone||"local timezone"} · coordinates ${lat.toFixed(4)}, ${lon.toFixed(4)}`;forecastSummary.innerHTML=`<div class="statvalue teal">${sum.toFixed(1)} mm</div><div class="sub">Forecast precipitation total over the next 24 hourly steps</div><div class="kpirow"><span>Highest hourly precipitation probability</span><b>${pmax==null?"—":pmax+"%"}</b></div><div class="kpirow"><span>Forecast model source</span><b>Open-Meteo</b></div>`;let arr=(d.hourly?.time||[]).slice(startIndex,startIndex+12);forecastHours.innerHTML=arr.filter((_,i)=>i%2===0).slice(0,6).map((t,i)=>{let ix=startIndex+i*2,mm=d.hourly.precipitation[ix]||0,pr=d.hourly.precipitation_probability[ix];return `<div class="forecastcell"><small>${new Date(t).toLocaleString([],{weekday:"short",hour:"2-digit"})}</small><b>${Number(mm).toFixed(1)} mm</b><small>${pr??"—"}% chance</small></div>`}).join("")||'<div class="empty">No hourly values received.</div>'}catch(e){forecastStatus.textContent="Forecast unavailable: "+e.message;forecastSummary.textContent="No forecast loaded. Check connectivity and try again."}}
+function parseTelemetry(obj){
+ if(!obj||typeof obj!=="object"||Array.isArray(obj))return;
+ const num=v=>v===null||v===undefined||v===""?null:Number.isFinite(Number(v))?Number(v):null;
+ const device=String(obj.device_id||"unknown").slice(0,64);
+ let dist=num(obj.distance_cm),stage=num(obj.stage_m);
+ if(dist!==null&&(dist<0||dist>1000))dist=null;
+ if(stage!==null&&(stage<-50||stage>200))stage=null;
+ const pick=$("deviceSite").value;
+ const reported=state.sites.find(x=>x.id===obj.site_id)?.id||"";
+ if(!reported&&pick&&!state.deviceMap[device])state.deviceMap[device]=pick;
+ const siteId=reported||state.deviceMap[device]||pick||"";
+ const row={id:uid("TEL"),device_id:device,siteId,distance_cm:dist,stage_m:stage,sensor_height_above_datum_m:num(obj.sensor_height_above_datum_m),health:String(obj.health||"not_reported").slice(0,32),tsMs:num(obj.ts_ms),receivedAt:new Date().toISOString()};
+ state.telemetry.unshift(row);state.telemetry=state.telemetry.slice(0,300);
+ lastTelemetry.textContent=`Device: ${device} · Distance: ${dist==null?"—":dist+" cm"} · Stage: ${stage==null?"not configured":stage+" m"} · Health: ${row.health}`;
+ let newObs=null;
+ if(siteId&&stage!==null&&row.health==="ok"){
+  const s=state.sites.find(x=>x.id===siteId);
+  if(s){let pass="unknown";const act=s.actionLevel!==""&&s.actionLevel!=null,alt=s.alertLevel!==""&&s.alertLevel!=null;if(act&&stage>=Number(s.actionLevel))pass="blocked";else if(alt&&stage>=Number(s.alertLevel))pass="caution";
+   const lastDev=state.observations.find(o=>o.siteId===siteId&&o.source==="device");
+   if(!lastDev||lastDev.passability!==pass||ageMinutes(lastDev.observedAt)>=15){
+    newObs={id:uid("SENSOR"),type:"water_level",siteId,passability:pass,depthCm:"",stageM:String(stage),source:"device",verification:"unverified",lat:s.lat,lon:s.lon,observer:device,submittedBy:device,observedAt:row.receivedAt,notes:"Device telemetry. Status uses site thresholds configured by this organisation; not an official alert.",createdAt:row.receivedAt};
+    stamp(newObs);state.observations.unshift(newObs);}}}
+ persist();
+ if(guardQuiet()){queueOp("telemetry","upsert",stamp(row));if(newObs)queueOp("observations","upsert",newObs);}
+ if(newObs)notifyObs(newObs);
+}
+let rxBuffer="";function feedLineText(txt){rxBuffer+=txt;if(rxBuffer.length>20000)rxBuffer=rxBuffer.slice(-2000);let lines=rxBuffer.split(/\r?\n/);rxBuffer=lines.pop();for(let line of lines){if(!line.trim())continue;try{parseTelemetry(JSON.parse(line))}catch(e){deviceStatus.textContent="Received a non-JSON line; ignored."}}}
+const NUS_SVC="6e400001-b5a3-f393-e0a9-e50e24dcca9e",NUS_TX="6e400003-b5a3-f393-e0a9-e50e24dcca9e";let manualDisconnect=false;
+async function bleSetup(dev){bleServer=await dev.gatt.connect();let svc=await bleServer.getPrimaryService(NUS_SVC);bleChar=await svc.getCharacteristic(NUS_TX);await bleChar.startNotifications();bleChar.addEventListener("characteristicvaluechanged",e=>feedLineText(new TextDecoder().decode(e.target.value)));deviceStatus.textContent="Connected to "+dev.name+"; waiting for JSON telemetry."}
+async function connectBLE(){if(!navigator.bluetooth){deviceStatus.textContent="Web Bluetooth is not available in this browser. Try Android Chrome or a supported desktop browser using HTTPS.";return}try{manualDisconnect=false;bleDevice=await navigator.bluetooth.requestDevice({filters:[{services:[NUS_SVC]}]});bleDevice.addEventListener("gattserverdisconnected",async()=>{if(manualDisconnect){deviceStatus.textContent="Disconnected.";return}for(let i=1;i<=3;i++){deviceStatus.textContent="BLE signal lost — reconnecting ("+i+"/3)…";await new Promise(r=>setTimeout(r,3000*i));try{await bleSetup(bleDevice);return}catch(e){}}deviceStatus.textContent="BLE device disconnected. Reconnect manually."});await bleSetup(bleDevice)}catch(e){deviceStatus.textContent="BLE connection failed: "+e.message}}
+async function connectSerial(preset){if(!navigator.serial){deviceStatus.textContent="Web Serial is unavailable in this browser. Use compatible Chromium over HTTPS or localhost.";return}try{manualDisconnect=false;serialPort=preset||await navigator.serial.requestPort();await serialPort.open({baudRate:115200});serialReader=serialPort.readable.getReader();deviceStatus.textContent="USB Serial connected at 115200 baud.";readSerial()}catch(e){deviceStatus.textContent="Serial connection failed: "+e.message}}
+async function readSerial(){let decoder=new TextDecoder();try{while(serialPort&&serialPort.readable){let {value,done}=await serialReader.read();if(done)break;if(value)feedLineText(decoder.decode(value,{stream:true}))}}catch(e){deviceStatus.textContent="Serial stream stopped: "+e.message}}
+async function disconnectDevices(){manualDisconnect=true;try{if(serialReader){await serialReader.cancel();serialReader.releaseLock();serialReader=null}if(serialPort){await serialPort.close();serialPort=null}if(bleDevice?.gatt?.connected)bleDevice.gatt.disconnect()}catch(e){}deviceStatus.textContent="Disconnected."}
+function renderOverviewMap(){initMap("mapOverview");refreshMap("mapOverview")}
+function renderAllInit(){document.getElementById("observedAt").value=localDateTime();renderAll();renderOverviewMap()}
+renderAllInit();go("overview");
+/* ================= Production layer: roles, cloud sync, edits, alerts ================= */
+const TBL={sites:"fb_sites",observations:"fb_observations",assets:"fb_assets",telemetry:"fb_telemetry"};
+function stamp(r){r.updatedAt=new Date().toISOString();return r}
+function canWrite(){return !cloud.user||!cloud.org||cloud.role!=="viewer"}
+function guard(){if(!canWrite()){toast("Your role is read-only. Ask an organisation admin for editor access.","error");return false}return true}
+function guardQuiet(){return !!(cloud.client&&cloud.user&&cloud.org&&canWrite())}
+function saveQuiet(){try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}renderSettings()}
+function queueOp(kind,op,rec){
+ const id=rec.id,key=kind+":"+id;
+ if(op==="upsert"){const ex=state.pending.find(o=>o.kind===kind&&o.op==="upsert"&&o.rec.id===id);if(ex)ex.rec=rec;else state.pending.push({kind,op,rec})}
+ else{state.pending=state.pending.filter(o=>!(o.kind===kind&&o.op==="upsert"&&o.rec.id===id));state.pending.push({kind,op,rec:{id}})}
+ saveQuiet();return flush();
+}
+function localOnly(kind,op,rec){/* queue only when an organisation is active; otherwise records stay local */if(cloud.client&&cloud.user&&cloud.org)return queueOp(kind,op,rec);return Promise.resolve()}
+let flushing=false;
+function cleanRec(r){const c={...r};delete c.synced;return c}
+async function flush(){
+ const c=cloud.client;if(!c||!cloud.user||!cloud.org||flushing||!state.pending.length)return;
+ flushing=true;
+ try{
+  while(state.pending.length){
+   const first=state.pending[0],group=[first];
+   for(let k=1;k<state.pending.length&&group.length<200;k++){const o=state.pending[k];if(o.kind===first.kind&&o.op===first.op)group.push(o);else break}
+   let err=null;
+   if(first.op==="upsert"){
+    const rows=group.map(o=>({id:o.rec.id,org_id:cloud.org.id,data:cleanRec(o.rec),updated_at:o.rec.updatedAt||new Date().toISOString()}));
+    ({error:err}=await c.from(TBL[first.kind]).upsert(rows,{onConflict:"id"}));
+    if(!err)group.forEach(o=>{const l=state[first.kind].find(x=>x.id===o.rec.id);if(l)l.synced=true});
+   }else{
+    ({error:err}=await c.from(TBL[first.kind]).delete().in("id",group.map(o=>o.rec.id)));
+   }
+   if(err){
+    if(/^(22|23|42501)/.test(err.code||"")){state.pending.splice(0,group.length);toast("A change was rejected by the database and skipped: "+err.message,"error");continue}
+    throw err;
+   }
+   state.pending.splice(0,group.length);
+  }
+  cloud.syncText="Synced "+new Date().toLocaleTimeString();
+ }catch(e){cloud.syncText="Paused ("+state.pending.length+" pending): "+(e.message||e)}
+ finally{flushing=false;saveQuiet()}
+}
+window.addEventListener("online",()=>flush());
+function mergeRemote(kind,rows,limit){
+ const deleted=new Set(state.pending.filter(o=>o.op==="delete"&&o.kind===kind).map(o=>o.rec.id));
+ const local=new Map(state[kind].map(r=>[r.id,r]));const remoteIds=new Set();
+ for(const row of rows){if(deleted.has(row.id))continue;const rec={...row.data,id:row.id,synced:true};remoteIds.add(row.id);const l=local.get(row.id);if(!l||(rec.updatedAt||row.updated_at||"")>=(l.updatedAt||""))local.set(row.id,rec)}
+ const uploads=[];
+ for(const [id,l] of [...local]){if(remoteIds.has(id))continue;if(l.synced){if(rows.length<limit)local.delete(id)}else uploads.push(l)}
+ state[kind]=[...local.values()];
+ return uploads;
+}
+async function syncExisting(){
+ const c=cloud.client;if(!c||!cloud.user||!cloud.org)return;
+ try{
+  cloud.syncText="Loading cloud records…";saveQuiet();
+  const lim={sites:1000,observations:3000,assets:1000,telemetry:500};
+  const res=await Promise.all(Object.keys(TBL).map(k=>c.from(TBL[k]).select("id,data,updated_at").eq("org_id",cloud.org.id).order("updated_at",{ascending:false}).limit(lim[k])));
+  for(const r of res)if(r.error)throw r.error;
+  let uploads={};Object.keys(TBL).forEach((k,i)=>{uploads[k]=mergeRemote(k,res[i].data||[],lim[k])});
+  state.observations.sort((a,b)=>new Date(b.observedAt)-new Date(a.observedAt));state.telemetry.sort((a,b)=>new Date(b.receivedAt)-new Date(a.receivedAt));
+  const total=uploads.sites.length+uploads.observations.length+uploads.assets.length;
+  const key="fb_upload_"+cloud.org.id;let decision=localStorage.getItem(key);
+  if(total&&canWrite()&&!decision){decision=confirm("Upload "+total+" records currently stored only in this browser to the organisation workspace "+cloud.org.name+"? Choose Cancel if they are personal or test data.")?"yes":"no";localStorage.setItem(key,decision)}
+  if(canWrite()&&decision==="yes"){for(const k of ["sites","observations","assets"])uploads[k].forEach(r=>queueOp(k,"upsert",r));uploads.telemetry.slice(0,100).forEach(r=>queueOp("telemetry","upsert",r))}
+  persist();scheduleRain();await flush();startRealtime();
+ }catch(e){cloud.syncText="Sync error";saveQuiet();toast("Cloud sync issue: "+(e.message||e)+" — confirm supabase/schema.sql has been run.","error")}
+}
+function startRealtime(){
+ const c=cloud.client;if(!c||!cloud.org)return;stopRealtime();
+ let ch=c.channel("fb-"+cloud.org.id);
+ for(const k of Object.keys(TBL))ch=ch.on("postgres_changes",{event:"*",schema:"public",table:TBL[k],filter:"org_id=eq."+cloud.org.id},pl=>{
+  if(pl.eventType==="DELETE"){state[k]=state[k].filter(r=>r.id!==pl.old.id)}
+  else{const row=pl.new,rec={...row.data,id:row.id,synced:true},i=state[k].findIndex(r=>r.id===row.id);if(i>=0){if((rec.updatedAt||"")>=(state[k][i].updatedAt||""))state[k][i]=rec}else{state[k].unshift(rec);if(k==="observations")notifyObs(rec)}}
+  if(k==="observations")state.observations.sort((a,b)=>new Date(b.observedAt)-new Date(a.observedAt));
+  persist();
+ });
+ ch.subscribe();cloud.channel=ch;
+}
+function stopRealtime(){if(cloud.channel&&cloud.client){cloud.client.removeChannel(cloud.channel)}cloud.channel=null}
+async function loadMembership(){
+ const c=cloud.client;cloud.org=null;cloud.role=null;cloud.members=[];
+ const {data:m,error}=await c.from("fb_memberships").select("org_id,role").eq("user_id",cloud.user.id);
+ if(error)throw error;if(!m.length)return;
+ const pref=localStorage.getItem("fb_org");const mm=m.find(x=>x.org_id===pref)||m[0];
+ const {data:org,error:e2}=await c.from("fb_orgs").select("id,name,join_code").eq("id",mm.org_id).single();if(e2)throw e2;
+ cloud.org=org;cloud.role=mm.role;localStorage.setItem("fb_org",org.id);
+ const {data:mem}=await c.from("fb_memberships").select("user_id,role,email,created_at").eq("org_id",org.id).order("created_at");cloud.members=mem||[];
+}
+let afterBusy=false;
+async function afterAuth(){if(afterBusy||!cloud.user)return;afterBusy=true;try{await loadMembership();renderSettings();if(cloud.org)await syncExisting()}catch(e){toast("Could not load organisation: "+(e.message||e)+" — has supabase/schema.sql been run?","error")}finally{afterBusy=false;renderSettings();window.dispatchEvent(new Event("floodbridge-cloud-ready"))}}
+async function connectCloud(){
+ const cfg=window.FLOODBRIDGE_CONFIG||{};const fixed=!!(cfg.supabaseUrl&&cfg.supabaseAnonKey);
+ const url=(fixed?cfg.supabaseUrl:$("sbUrl").value).trim().replace(/\/$/,""),key=(fixed?cfg.supabaseAnonKey:$("sbKey").value).trim();
+ if(!/^https:\/\/.+/.test(url)||!key){toast("Enter a valid Supabase project URL and public anon/publishable key","error");return}
+ if(key.split(".").length===3){try{const pl=JSON.parse(atob(key.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));if(pl.role==="service_role"){toast("That is a service_role key. Never use it in a browser app. Use the anon/publishable key.","error");return}}catch(e){}}
+ try{
+  const {createClient}=await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm");
+  cloud.client=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
+  if(!fixed)localStorage.setItem("floodbridge_cloud",JSON.stringify({url,key}));
+  const {data,error}=await cloud.client.auth.getSession();if(error)throw error;cloud.user=data.session?.user||null;
+  cloud.client.auth.onAuthStateChange((ev,session)=>{cloud.user=session?.user||null;if(ev==="SIGNED_OUT"){stopRealtime();cloud.org=null;cloud.role=null;cloud.members=[];window.dispatchEvent(new Event("floodbridge-signed-out"))}else if(ev==="SIGNED_IN")afterAuth();renderSettings()});
+  renderSettings();if(cloud.user)await afterAuth();else toast("Connected. Sign in to join your organisation.");
+ }catch(e){cloud.client=null;renderSettings();toast("Cloud connection failed: "+(e.message||e),"error")}
+}
+function openAuth(mode){if(!cloud.client){toast("Connect your Supabase project first","warning");return}authSubmit.dataset.mode=mode;authTitle.textContent=mode==="signup"?"Create account":"Sign in";authNote.textContent=mode==="signup"?"Email confirmation may be required by your project settings.":"Use the account created for your organisation.";authModal.classList.add("open")}
+function renderSettings(){
+ const pc=$("pendingCount");if(!pc)return;pc.textContent=state.pending.length;
+ $("localCount").textContent=state.sites.length+state.observations.length+state.assets.length+state.telemetry.length;
+ const up=cloud.client?(cloud.user?(cloud.org?(state.pending.length?"SYNCING · "+state.pending.length:"SYNCED"):"NO ORGANISATION"):"SIGNED OUT"):"LOCAL ONLY";
+ $("syncPill").textContent=up+(cloud.org&&cloud.role==="viewer"?" · READ-ONLY":"");$("cloudPill").textContent=cloud.client?(cloud.user?"SIGNED IN":"CONNECTED"):"NOT CONNECTED";
+ $("sideSync").textContent=cloud.org?cloud.org.name:"Local records";
+ $("cloudUser").textContent=cloud.user?.email||"Not signed in";$("cloudOrg").textContent=cloud.org?.name||"—";$("cloudRole").textContent=cloud.role||"—";$("cloudSync").textContent=cloud.syncText||(cloud.client?"Idle":"Local only");
+ const cfg=window.FLOODBRIDGE_CONFIG||{};$("sbConfigBox").classList.toggle("hidden",!!(cfg.supabaseUrl&&cfg.supabaseAnonKey));
+ $("orgJoinBox").classList.toggle("hidden",!(cloud.user&&!cloud.org));$("orgSetup").classList.toggle("hidden",!!cloud.user&&!!cloud.org);
+ const adm=cloud.org&&cloud.role==="admin";$("orgAdminBox").classList.toggle("hidden",!adm);
+ if(adm){$("orgJoinCode").textContent=cloud.org.join_code;$("memberList").innerHTML=`<table><thead><tr><th>Member</th><th>Role</th><th></th></tr></thead><tbody>${cloud.members.map(m=>`<tr><td>${esc(m.email||m.user_id)}</td><td>${m.user_id===cloud.user.id?"admin (you)":`<select data-act="member-role" data-id="${esc(m.user_id)}">${["viewer","editor","admin"].map(r=>`<option ${r===m.role?"selected":""}>${r}</option>`).join("")}</select>`}</td><td>${m.user_id===cloud.user.id?"":`<button class="btn sm danger" data-act="member-del" data-id="${esc(m.user_id)}">Remove</button>`}</td></tr>`).join("")}</tbody></table>`}
+}
+/* ---- forms ---- */
+function resetSiteForm(){siteForm.reset();siteEditId.value="";siteSaveBtn.textContent="Save monitored site";siteCancelBtn.classList.add("hidden")}
+function resetAssetForm(){assetForm.reset();assetEditId.value="";assetSaveBtn.textContent="Save lifeline asset";assetCancelBtn.classList.add("hidden")}
+siteCancelBtn.addEventListener("click",resetSiteForm);assetCancelBtn.addEventListener("click",resetAssetForm);
+siteForm.addEventListener("submit",e=>{e.preventDefault();if(!guard())return;const lat=Number(siteLat.value),lon=Number(siteLon.value);if(!validCoords(lat,lon)){toast("Enter valid latitude (-90 to 90) and longitude (-180 to 180).","error");return}
+ const t=[["watch",watchLevel.value],["alert",alertLevel.value],["action",actionLevel.value]].filter(x=>x[1]!=="");for(let i=0;i<t.length;i++){if(!Number.isFinite(Number(t[i][1]))){toast("Threshold levels must be numbers.","error");return}if(i&&Number(t[i][1])<=Number(t[i-1][1])){toast("Thresholds must increase: watch < alert < action.","error");return}}
+ const f={name:siteName.value.trim(),type:siteType.value,lat,lon,datum:datum.value,watchLevel:watchLevel.value,alertLevel:alertLevel.value,actionLevel:actionLevel.value,notes:siteNotes.value};
+ let rec;if(siteEditId.value){rec=state.sites.find(x=>x.id===siteEditId.value);if(!rec)return;Object.assign(rec,f);rec.synced=false}else{rec={id:uid("SITE"),...f,createdAt:new Date().toISOString()};state.sites.unshift(rec)}
+ stamp(rec);resetSiteForm();persist();localOnly("sites","upsert",rec);scheduleRain();toast("Site saved");go("map")});
+observationForm.addEventListener("submit",e=>{e.preventDefault();if(!guard())return;const lat=Number(obsLat.value),lon=Number(obsLon.value);if(!validCoords(lat,lon)){toast("Enter valid coordinates.","error");return}
+ const observedAt=new Date(observedAtInput()).toISOString();if(new Date(observedAt).getTime()>Date.now()+5*60000){toast("Observation time cannot be in the future.","error");return}
+ const o=stamp({id:uid("OBS"),type:obsType.value,siteId:obsSite.value,passability:passability.value,depthCm:depth.value,stageM:stage.value,source:obsSource.value,verification:"unverified",lat,lon,observer:observer.value.trim(),submittedBy:cloud.user?.email||"",observedAt,notes:obsNotes.value.trim(),createdAt:new Date().toISOString()});
+ state.observations.unshift(o);e.target.reset();$("observedAt").value=localDateTime();persist();localOnly("observations","upsert",o);toast("Observation saved");go("events")});
+assetForm.addEventListener("submit",e=>{e.preventDefault();if(!guard())return;const lat=Number(assetLat.value),lon=Number(assetLon.value);if(!validCoords(lat,lon)){toast("Enter valid asset coordinates.","error");return}
+ const f={name:assetName.value.trim(),type:assetType.value,lat,lon,criticality:assetCriticality.value,dependency:assetDependency.value,notes:assetNotes.value.trim()};
+ let rec;if(assetEditId.value){rec=state.assets.find(x=>x.id===assetEditId.value);if(!rec)return;Object.assign(rec,f);rec.synced=false}else{rec={id:uid("AST"),...f,createdAt:new Date().toISOString()};state.assets.unshift(rec)}
+ stamp(rec);resetAssetForm();persist();localOnly("assets","upsert",rec);toast("Asset saved")});
+["evSearch","evVer","evFresh"].forEach(id=>$(id).addEventListener("input",renderEvents));
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b||b.tagName==="SELECT")return;const id=b.dataset.id,act=b.dataset.act;
+ if(act==="obs-detail")return showObservation(id);
+ if(act==="site-edit"){const x=state.sites.find(r=>r.id===id);if(!x)return;go("map");siteEditId.value=id;siteName.value=x.name;siteType.value=x.type;siteLat.value=x.lat;siteLon.value=x.lon;datum.value=x.datum||"";watchLevel.value=x.watchLevel||"";alertLevel.value=x.alertLevel||"";actionLevel.value=x.actionLevel||"";siteNotes.value=x.notes||"";siteSaveBtn.textContent="Update site";siteCancelBtn.classList.remove("hidden");siteName.scrollIntoView({behavior:"smooth",block:"center"});return}
+ if(act==="asset-edit"){const x=state.assets.find(r=>r.id===id);if(!x)return;assetEditId.value=id;assetName.value=x.name;assetType.value=x.type;assetLat.value=x.lat;assetLon.value=x.lon;assetCriticality.value=x.criticality;assetDependency.value=x.dependency||"";assetNotes.value=x.notes||"";assetSaveBtn.textContent="Update asset";assetCancelBtn.classList.remove("hidden");assetName.scrollIntoView({behavior:"smooth",block:"center"});return}
+ if(!guard())return;
+ if(act==="site-del"){const x=state.sites.find(r=>r.id===id);if(!x)return;const n=state.observations.filter(o=>o.siteId===id).length+state.assets.filter(a=>a.dependency===id).length;if(!confirm("Delete site "+x.name+"? "+n+" linked observations/assets will remain but show as unlinked."))return;state.sites=state.sites.filter(r=>r.id!==id);persist();localOnly("sites","delete",{id});toast("Site deleted","warning")}
+ else if(act==="asset-del"){const x=state.assets.find(r=>r.id===id);if(!x||!confirm("Delete asset "+x.name+"?"))return;state.assets=state.assets.filter(r=>r.id!==id);persist();localOnly("assets","delete",{id});toast("Asset deleted","warning")}
+ else if(act==="obs-del"){if(!confirm("Delete this observation permanently?"))return;state.observations=state.observations.filter(r=>r.id!==id);persist();localOnly("observations","delete",{id});toast("Observation deleted","warning")}
+ else if(act==="obs-verify"||act==="obs-reject"){const o=state.observations.find(r=>r.id===id);if(!o)return;o.verification=act==="obs-verify"?"verified":"rejected";o.verifiedBy=cloud.user?.email||"local operator";o.verifiedAt=new Date().toISOString();o.synced=false;stamp(o);persist();localOnly("observations","upsert",o);toast("Observation marked "+o.verification)}
+ else if(act==="member-del"){if(!confirm("Remove this member?"))return;cloud.client.from("fb_memberships").delete().eq("org_id",cloud.org.id).eq("user_id",id).then(async r=>{if(r.error)toast(r.error.message,"error");else{await loadMembership();renderSettings()}})}
+});
+document.addEventListener("change",e=>{const b=e.target.closest("select[data-act]");if(!b)return;const id=b.dataset.id;
+ if(b.dataset.act==="device-site"){state.deviceMap[id]=b.value;persist()}
+ if(b.dataset.act==="member-role"){cloud.client.from("fb_memberships").update({role:b.value}).eq("org_id",cloud.org.id).eq("user_id",id).then(async r=>{if(r.error)toast(r.error.message,"error");else{toast("Role updated");await loadMembership();renderSettings()}})}
+});
+/* ---- settings / cloud controls ---- */
+$("cloudConnect").addEventListener("click",connectCloud);$("cloudLogin").addEventListener("click",()=>openAuth("login"));$("cloudSignup").addEventListener("click",()=>openAuth("signup"));
+$("cloudLogout").addEventListener("click",async()=>{if(!cloud.client)return;await cloud.client.auth.signOut();toast("Signed out")});
+$("authCancel").addEventListener("click",()=>authModal.classList.remove("open"));
+$("authSubmit").addEventListener("click",async()=>{const email=authEmail.value.trim(),password=authPassword.value;if(!email||!password){toast("Enter email and password","error");return}try{const mode=authSubmit.dataset.mode;const r=mode==="signup"?await cloud.client.auth.signUp({email,password}):await cloud.client.auth.signInWithPassword({email,password});if(r.error)throw r.error;authModal.classList.remove("open");authPassword.value="";toast(mode==="signup"?"Account requested. Confirm your email if required, then sign in.":"Signed in");if(r.data.session){cloud.user=r.data.session.user;afterAuth()}}catch(e){toast(e.message,"error")}});
+$("orgCreate").addEventListener("click",async()=>{const n=orgName.value.trim();if(!n){toast("Enter an organisation name","error");return}const r=await cloud.client.rpc("fb_create_org",{p_name:n});if(r.error)return toast(r.error.message,"error");toast("Organisation created. You are its administrator.");await afterAuth()});
+$("orgJoin").addEventListener("click",async()=>{const c=orgCode.value.trim();if(!c){toast("Enter the join code","error");return}const r=await cloud.client.rpc("fb_join_org",{p_code:c});if(r.error)return toast(r.error.message,"error");toast("Joined as read-only. Ask an admin to promote you if you need to submit reports.");await afterAuth()});
+$("rotateCode").addEventListener("click",async()=>{if(!confirm("Rotate the join code? The old code stops working."))return;const r=await cloud.client.rpc("fb_rotate_code",{p_org:cloud.org.id});if(r.error)return toast(r.error.message,"error");cloud.org.join_code=r.data;renderSettings();toast("Join code rotated")});
+$("saveParams").addEventListener("click",()=>{const f=Number(freshMin.value),a=Number(agingMin.value);if(a<=f){toast("Aging window must be longer than the fresh window.","error");return}state.settings.freshMin=f;state.settings.agingMin=a;persist();toast("Parameters saved")});
+function renderAlertsBtn(){const b=$("alertsBtn"),ok="Notification" in window;b.disabled=!ok;b.textContent=!ok?"Alerts unsupported":state.alertsOn&&Notification.permission==="granted"?"Disable browser alerts":"Enable browser alerts"}
+$("alertsBtn").addEventListener("click",async()=>{if(state.alertsOn&&Notification.permission==="granted"){state.alertsOn=false;saveQuiet();renderAlertsBtn();return}const p=await Notification.requestPermission();state.alertsOn=p==="granted";saveQuiet();renderAlertsBtn();toast(state.alertsOn?"Alerts enabled while this tab is open.":"Notification permission was not granted","warning")});
+const notified=new Set();
+function notifyObs(o){if(!state.alertsOn||!("Notification" in window)||Notification.permission!=="granted")return;if(o.passability!=="blocked"||o.verification==="rejected"||freshness(o)!=="fresh"||notified.has(o.id))return;notified.add(o.id);const s=state.sites.find(x=>x.id===o.siteId);try{new Notification("FloodBridge · reported blocked crossing",{body:(s?.name||"Unlinked location")+" — "+(o.source==="device"?"sensor threshold":"observer report")+". Not an official warning."})}catch(e){}}
+$("clearLocal").addEventListener("click",()=>{if(!confirm("Clear all records stored in this browser? Cloud records are not deleted."))return;state.sites=[];state.observations=[];state.assets=[];state.telemetry=[];state.pending=[];localStorage.removeItem("fb_upload_"+(cloud.org?.id||""));persist();toast("Local data cleared","warning")});
+$("importBtn").addEventListener("click",()=>importFile.click());
+importFile.addEventListener("change",async()=>{const f=importFile.files[0];importFile.value="";if(!f)return;if(!guard())return;try{const j=JSON.parse(await f.text());const src=j.state||j;let added=0,dropped=0;const ok={sites:r=>validCoords(Number(r.lat),Number(r.lon))&&r.name,observations:r=>validCoords(Number(r.lat),Number(r.lon))&&!isNaN(new Date(r.observedAt)),assets:r=>validCoords(Number(r.lat),Number(r.lon))&&r.name,telemetry:r=>!isNaN(new Date(r.receivedAt))};for(const k of Object.keys(TBL)){const have=new Set(state[k].map(r=>r.id));for(const r of src[k]||[]){if(!r||typeof r.id!=="string"||String(r.id).startsWith("DEMO-")||!ok[k](r)){dropped++;continue}if(have.has(r.id))continue;const rec=stamp({...r,synced:false});state[k].push(rec);added++;localOnly(k,"upsert",rec)}}state.observations.sort((a,b)=>new Date(b.observedAt)-new Date(a.observedAt));persist();scheduleRain();toast("Restored "+added+" records"+(dropped?" ("+dropped+" invalid skipped)":""))}catch(e){toast("Backup could not be read: "+e.message,"error")}});
+/* ---- forecast for all sites (single multi-location Open-Meteo request) ---- */
+let rainTimer=null;function scheduleRain(){clearTimeout(rainTimer);rainTimer=setTimeout(fetchSiteRain,1500)}
+async function fetchSiteRain(){const sites=state.sites.slice(0,40);if(!sites.length)return;try{const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+sites.map(s=>s.lat).join(",")+"&longitude="+sites.map(s=>s.lon).join(",")+"&hourly=precipitation&forecast_days=2&timezone=auto");if(!r.ok)throw new Error(r.status);const d=await r.json();const arr=Array.isArray(d)?d:[d];arr.forEach((loc,i)=>{const t=loc.hourly?.time||[],now=new Date(Date.now()+(loc.utc_offset_seconds||0)*1000).toISOString().slice(0,13);let st=t.findIndex(x=>x.slice(0,13)>=now);if(st<0)st=0;const mm=(loc.hourly?.precipitation||[]).slice(st,st+24).reduce((a,b)=>a+(Number(b)||0),0);if(sites[i])siteRain[sites[i].id]={mm,at:Date.now()}});renderSites();renderOverview()}catch(e){/* forecast is context only; fail quietly */}}
+/* ---- init ---- */
+renderAlertsBtn();
+if("serial" in navigator){navigator.serial.getPorts().then(p=>{if(p.length)connectSerial(p[0])}).catch(()=>{})}
+setInterval(()=>{renderOverview();renderRegistry();flush()},60000);setInterval(fetchSiteRain,30*60000);scheduleRain();
+{const cfg=window.FLOODBRIDGE_CONFIG||{};if(cfg.supabaseUrl&&cfg.supabaseAnonKey)connectCloud();else{try{const sv=JSON.parse(localStorage.getItem("floodbridge_cloud")||"{}");if(sv.url&&sv.key){sbUrl.value=sv.url;sbKey.value=sv.key;connectCloud()}}catch(e){}}}
+renderSettings();
+
+</script>
+<script src="v2-modules.js"></script>
+</body></html>
