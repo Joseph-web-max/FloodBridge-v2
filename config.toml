@@ -1,0 +1,25 @@
+project_id = "floodbridge-institutional"
+
+# These public endpoints authenticate the incoming provider request themselves.
+[functions.community-intake]
+verify_jwt = false
+[functions.community-status]
+verify_jwt = false
+[functions.ussd-gateway]
+verify_jwt = false
+[functions.email-inbound]
+verify_jwt = false
+[functions.social-webhook]
+verify_jwt = false
+[functions.twilio-inbound]
+verify_jwt = false
+
+# All staff-only functions keep Supabase JWT verification enabled.
+[functions.integration-status]
+verify_jwt = true
+[functions.incident-triage]
+verify_jwt = true
+[functions.route-planner]
+verify_jwt = true
+[functions.notify-dispatch]
+verify_jwt = true
